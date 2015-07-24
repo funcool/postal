@@ -1,9 +1,6 @@
-# Catacumba #
+# postal-parser #
 
-The asynchronous web toolkit for clojure built on top of Ratpack
+A POSTAL protocol frames parser for Clojure & ClojureScript, implemented using
+clojure 1.7 reader conditionals.
 
-[![Clojars Project](http://clojars.org/funcool/catacumba/latest-version.svg)](http://clojars.org/funcool/catacumba)
-
-See the [documentation](https://funcool.github.io/catacumba/latest/) or
-[api reference](https://funcool.github.io/catacumba/latest/api/) for more detailed
-information.
+[![Clojars Project](http://clojars.org/funcool/postal-parser/latest-version.svg)](http://clojars.org/funcool/postal-parser)
