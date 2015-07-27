@@ -1,7 +1,7 @@
 (ns postal.parser-tests
   (:require #?(:clj[clojure.test :as t]
                :cljs [cljs.test :as t])
-            [postal.parser :as p]))
+            [postal.core :as postal]))
 
 #?(:cljs (enable-console-print!))
 
@@ -24,21 +24,21 @@
        "header2:value2\n"))
 
 (t/deftest read-complete-frame
-  (let [frame (p/parse message1)]
-    (t/is (= (:command frame) "COMMAND"))
+  (let [frame (postal/parse message1)]
+    (t/is (= (:command frame) :command))
     (t/is (= (:headers frame) {:header1 "value1" :header2 "value2"}))
     (t/is (= (:body frame) "body value"))))
 
 (t/deftest read-frame-without-body
-  (let [frame (p/parse message2)]
-    (t/is (= (:command frame) "COMMAND"))
+  (let [frame (postal/parse message2)]
+    (t/is (= (:command frame) :command))
     (t/is (= (:headers frame) {:header1 "value1" :header2 "value2"}))
     (t/is (= (:body frame) ""))))
 
 (t/deftest read-incomplete-frame
   (t/is (thrown? #?(:clj java.lang.RuntimeException
                     :cljs js/Error)
-                 (p/parse message3))))
+                 (postal/parse message3))))
 
 #?(:cljs
    (defmethod t/report [:cljs.test/default :end-run-tests]

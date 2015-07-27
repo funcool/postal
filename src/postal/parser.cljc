@@ -1,12 +1,8 @@
 (ns postal.parser
-  #?(:cljs
-     (:import goog.string.StringBuffer))
-  #?(:cljs
-     (:require [cljs.tools.reader.reader-types :as reader]
-               [cuerdas.core :as str])
-     :clj
-     (:require [clojure.tools.reader.reader-types :as reader]
-               [cuerdas.core :as str])))
+  #?(:cljs (:import goog.string.StringBuffer))
+  (:require [postal.reader :as reader]
+            [postal.frames :as frames]
+            [cuerdas.core :as str]))
 
 ;; this character denotes the end of a frame.
 (def ^:dynamic *frame-end* nil) ;; ASCII null
@@ -131,17 +127,12 @@
                (assoc frame :body (read-body reader))))
 
       (= parsing :complete)
-      (map->Frame frame)
+      (frames/frame (:command frame)
+                    (:headers frame)
+                    (:body frame))
 
       (= chr-in ::continue)
       (recur (reader/read-char reader)
              parsing
              frame))))
 
-(defn parse
-  "Parses the provided POSTAL frame data into a
-  hash-map (frame-struct). It will read the headers greedily but
-  return the body of the frame lazily; the body will be a sequence."
-  [data]
-  (let [reader (reader/string-push-back-reader data)]
-    (parse-frame reader)))
