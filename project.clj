@@ -7,6 +7,6 @@
   :jar-exclusions [#"\.swp|\.swo|user.clj"]
   :javac-options ["-target" "1.8" "-source" "1.8" "-Xlint:-options"]
   :dependencies [[org.clojure/clojure "1.7.0" :scope "provided"]
+                 [org.clojure/clojurescript "0.0-3308" :scope "provided"]
                  [org.clojure/tools.reader "0.10.0-alpha1"]
-                 [funcool/cuerdas "0.5.0"]]
-  :profiles {:dev {:dependencies [[org.clojure/clojurescript "0.0-3308"]]}})
+                 [funcool/cuerdas "0.5.0"]])
