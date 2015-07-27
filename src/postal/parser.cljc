@@ -38,7 +38,7 @@
                 "End of frame reached while reading command"))
 
       (= chr-in *line-end*)
-      (apply str buffer)
+      (keyword (str/lower (apply str buffer)))
 
       :else
       (recur (reader/read-char reader)
