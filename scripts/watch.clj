@@ -3,6 +3,6 @@
 (b/watch (b/inputs "test" "src")
   {:main 'postal.parser-tests
    :target :nodejs
-   :output-to "tests.js"
+   :output-to "out/tests.js"
    :output-dir "out"
    :verbose true})

@@ -8,7 +8,7 @@
   (b/build
    (b/inputs "test" "src")
    {:main 'postal.parser-tests
-    :output-to "tests.js"
+    :output-to "out/tests.js"
     :output-dir "out"
     :target :nodejs
     :verbose true})
