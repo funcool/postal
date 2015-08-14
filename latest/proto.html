@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="author" content="Andrey Antukh, &lt;niwi@niwi.nz&gt;">
+<title>POSTAL - Protocol Spcification.</title>
+<style>
+.listingblock .pygments .hll { background-color: #ffffcc }
+.listingblock .pygments  { background: #f0f0f0; }
+.listingblock .pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+.listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+.listingblock .pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+.listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.listingblock .pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+.listingblock .pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.listingblock .pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+.listingblock .pygments .tok-ge { font-style: italic } /* Generic.Emph */
+.listingblock .pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+.listingblock .pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.listingblock .pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+.listingblock .pygments .tok-go { color: #888888 } /* Generic.Output */
+.listingblock .pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.listingblock .pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+.listingblock .pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.listingblock .pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+.listingblock .pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.listingblock .pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.listingblock .pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.listingblock .pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+.listingblock .pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.listingblock .pygments .tok-kt { color: #902000 } /* Keyword.Type */
+.listingblock .pygments .tok-m { color: #40a070 } /* Literal.Number */
+.listingblock .pygments .tok-s { color: #4070a0 } /* Literal.String */
+.listingblock .pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+.listingblock .pygments .tok-nb { color: #007020 } /* Name.Builtin */
+.listingblock .pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.listingblock .pygments .tok-no { color: #60add5 } /* Name.Constant */
+.listingblock .pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.listingblock .pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.listingblock .pygments .tok-ne { color: #007020 } /* Name.Exception */
+.listingblock .pygments .tok-nf { color: #06287e } /* Name.Function */
+.listingblock .pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+.listingblock .pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.listingblock .pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+.listingblock .pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+.listingblock .pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+.listingblock .pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+.listingblock .pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+.listingblock .pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+.listingblock .pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+.listingblock .pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+.listingblock .pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+.listingblock .pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+.listingblock .pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.listingblock .pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+.listingblock .pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.listingblock .pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+.listingblock .pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.listingblock .pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+.listingblock .pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+.listingblock .pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+.listingblock .pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+.listingblock .pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+.listingblock .pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+.listingblock .pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+.listingblock .pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Liberation+Mono:400|Roboto+Slab:400,700"/>
+<link rel="stylesheet" href="https://www.niwi.nz/_assets/asciidoctor-styles/simple-red-titles/stylesheet.css"/>
+</head>
+<body class="article">
+<div id="header">
+<h1>POSTAL - Protocol Spcification.</h1>
+<div class="details">
+<span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.nz&gt;</span><br>
+<span id="revdate">Version 1.0</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"></div>
+<ul class="sectlevel1">
+<li><a href="#abstract">Abstract</a></li>
+<li><a href="#rationale">Rationale</a></li>
+<li><a href="#protocol-overview">Protocol Overview</a>
+<ul class="sectlevel2">
+<li><a href="#frames">Frames</a></li>
+<li><a href="#headers">Headers</a></li>
+<li><a href="#size-limits">Size Limits</a></li>
+</ul>
+</li>
+<li><a href="#common-frames">Common Frames</a>
+<ul class="sectlevel2">
+<li><a href="#hello">HELLO</a></li>
+<li><a href="#ack">ACK</a></li>
+<li><a href="#error">ERROR</a></li>
+<li><a href="#response">RESPONSE</a></li>
+<li><a href="#message">MESSAGE</a></li>
+<li><a href="#ping">PING</a></li>
+<li><a href="#pong">PONG</a></li>
+</ul>
+</li>
+<li><a href="#req-rep">REQ/REP</a>
+<ul class="sectlevel2">
+<li><a href="#query">QUERY</a></li>
+<li><a href="#novelty">NOVELTY</a></li>
+</ul>
+</li>
+<li><a href="#pub-sub">PUB/SUB</a>
+<ul class="sectlevel2">
+<li><a href="#subscribe">SUBSCRIBE</a></li>
+<li><a href="#unsubscribe">UNSUBSCRIBE</a></li>
+<li><a href="#publish">PUBLISH</a></li>
+</ul>
+</li>
+<li><a href="#push-pull">PUSH/PULL</a>
+<ul class="sectlevel2">
+<li><a href="#put">PUT</a></li>
+<li><a href="#take">TAKE</a></li>
+<li><a href="#consume">CONSUME</a></li>
+</ul>
+</li>
+<li><a href="#license">License</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="abstract"><a class="link" href="#abstract">Abstract</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>POSTAL is a simple and interoperable protocol designed for asynchronous message based
+client-to-server communication. It is defined as plain-text format for better
+interoperability and intends to be used on top of WebSockets or socket/message based
+communication protocols (nanomsg, zeromq, etc.).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="rationale"><a class="link" href="#rationale">Rationale</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The POSTAL protocol is originated from the need of a simple, client-to-server,
+asynchronous, message based protocol for the http layer (communicate browsers with servers
+using message based communication with similar semantics of HTTP).</p>
+</div>
+<div class="paragraph">
+<p>The unique real alternative to POSTAL is <em>STOMP</em> but, the last one is designed to work
+with message brokers with limited set of communication schemes such as topic and queue.
+That communication schemes are very flexible, but mount something like RPC on top of it
+usually adds a great amount of accidental complexity.</p>
+</div>
+<div class="paragraph">
+<p>In summary: <em>STOMP</em> is too much high level protocol.</p>
+</div>
+<div class="paragraph">
+<p>POSTAL intends to be a client-to-server communication instead client-to-broker (actors
+model) with similar semantis borrowed from HTTP for communicate clients that want send
+asynchronous request to server.</p>
+</div>
+<div class="paragraph">
+<p>Reliability and backpressure is one of the first goals of the POSTAL protocol.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="protocol-overview"><a class="link" href="#protocol-overview">Protocol Overview</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>POSTAL is a frame based protocol with frames modeled in the same way as <em>STOMP</em> or
+HTTP. A frame consists in a command, a set of headers and an optional body.
+The default encoding of the POSTAL frame is <strong>UTF-8</strong>.</p>
+</div>
+<div class="paragraph">
+<p>The POSTAL server is modeled as set of endpoints "a la" HTTP to which a messages can
+be sent. The message reception it should be reliable and with mandatory acknowledge.</p>
+</div>
+<div class="sect2">
+<h3 id="frames"><a class="link" href="#frames">Frames</a></h3>
+<div class="paragraph">
+<p>POSTAL is a frame based protocol that assumes a reliable 2-way streaming network
+protocol (such as TCP or WebSockets). THhe client and server will communicate ussing
+POSTAL frames sent over the stream. A frame&#8217;s structure looks like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">COMMAND
+header1:value1
+header2:value2
+
+body</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The frame does not have explicit delimiters because it intends to be used on top of
+low-level message based protocols like <strong>websockets</strong>, <strong>nanomsg</strong> or <strong>zeromq</strong>. So if you
+want use it on top of TCP, you should use your own technique for determie the frame.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="headers"><a class="link" href="#headers">Headers</a></h3>
+<div class="paragraph">
+<p>Some headers MAY be used, and have special meaning, with most frames.</p>
+</div>
+<div class="sect3">
+<h4 id="header-strong-id-strong"><a class="link" href="#header-strong-id-strong">Header: <strong>id</strong></a></h4>
+<div class="paragraph">
+<p>The <code>id</code> header serves for identify messages. It is mainly used by client frames. Frames
+without specified <code>id</code> does not return responses. And some frames has <code>id</code> as mandatory
+header.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="header-strong-content-type-strong"><a class="link" href="#header-strong-content-type-strong">Header: <strong>content-type</strong></a></h4>
+<div class="paragraph">
+<p>Is a optional header. Indicates the type of data comes in the body of the message.
+The server can be smart and decode the message before delegate the message to the
+user defined handler.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="repeated-header-entries"><a class="link" href="#repeated-header-entries">Repeated Header Entries</a></h4>
+<div class="paragraph">
+<p>If a client or a server receives repeated frame header entries, only the first header
+entry SHOULD be used as the value of header entry. Subsequent values are only used to
+maintain a history of state changes of the header and MAY be ignored.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="size-limits"><a class="link" href="#size-limits">Size Limits</a></h3>
+<div class="paragraph">
+<p>To prevent malicious clients from exploiting memory allocation in a server, servers MAY
+place maximum limits on:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the number of frame headers allowed in a single frame</p>
+</li>
+<li>
+<p>the maximum length of header lines</p>
+</li>
+<li>
+<p>the maximum size of a frame body</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>If these limits are exceeded the server SHOULD send the client an ERROR frame.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="common-frames"><a class="link" href="#common-frames">Common Frames</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="hello"><a class="link" href="#hello">HELLO</a></h3>
+<div class="paragraph">
+<p>A POSTAL client initializes the communication with the server sending a <code>HELLO</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">HELLO
+heart-beat: 2
+
+^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The server should respond also with <code>HELLO</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">HELLO
+server: catacumba/0.4.0 (netty)
+
+^@</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ack"><a class="link" href="#ack">ACK</a></h3>
+<div class="paragraph">
+<p>Is a generic frame that is used for acknowledge the messages received by the server.
+It represents the signal that the server have recived a message. Is a body less
+version of <code>RESPONSE</code> frame.</p>
+</div>
+<div class="paragraph">
+<p>This is aspect of the <code>ACK</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">ACK
+message-id: e11a27d3-4b86-4191-a310-12847fa79d48
+
+^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>ACK</code> frames should mandatory identify the associated message. So if a message
+sent to the server does not provide any identification id, the <code>ACK</code> frame should
+not to be send by server.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="error"><a class="link" href="#error">ERROR</a></h3>
+<div class="paragraph">
+<p>Is a generic frame that represents a error situation. This kind of messages can be send
+by server when something goes wrong.</p>
+</div>
+<div class="paragraph">
+<p>This is aspect of the <code>ERROR</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">ERROR
+content-type: application/json
+content-length: 31
+code: 404
+
+{&quot;message&quot;: &quot;Does not exists.&quot;}^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>ERROR</code> frame has <code>code</code> as mandatory header and it is represents a error code. The
+POSTAL protocol will define a little subset of semantic errors that can be used by
+your application or define your own error codes.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="response"><a class="link" href="#response">RESPONSE</a></h3>
+<div class="paragraph">
+<p>This is a generic frame that represents a server response to some kind of request. This
+frame is mainly used by REQ/REP scalability protocols explained below.</p>
+</div>
+<div class="paragraph">
+<p>This is aspect of the <code>RESPONSE</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">RESPONSE
+message-id: e11a27d3-4b86-4191-a310-12847fa79d48
+content-type: application/json
+content-length: 31
+
+{&quot;id&quot;: 1, &quot;first_name&quot;: &quot;Yennefer&quot;}^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <code>message-id</code> is a mandatory header that allow a client pair the response to the
+previous request frame. If a request message does not comes with <code>id</code> attribute,
+the response will not be sent by server.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="message"><a class="link" href="#message">MESSAGE</a></h3>
+<div class="paragraph">
+<p>This is a generic frame that represents a server message. This frame is very similar
+purpose that <code>RESPONSE</code> but very different semantics. This frame can be sent by server
+in any moment, without client intervention.</p>
+</div>
+<div class="paragraph">
+<p>Mainly used for consume messages from subscriptions or from queues. See more PUB/SUB and
+PUSH/PULL scalability protocols.</p>
+</div>
+<div class="paragraph">
+<p>This is aspect of the <code>RESPONSE</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">MESSAGE
+subscription: e11a27d3-4b86-4191-a310-12847fa79d48
+content-type: application/json
+content-length: 31
+
+{&quot;id&quot;: 1, &quot;first_name&quot;: &quot;Yennefer&quot;}^@</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="ping"><a class="link" href="#ping">PING</a></h3>
+<div class="paragraph">
+<p>This is a server frame that&#8217;s used for the keepalive control.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">PING
+id: 1
+
+^@</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="pong"><a class="link" href="#pong">PONG</a></h3>
+<div class="paragraph">
+<p>This is a client frame that&#8217;s used for reply the <code>PING</code> frames. Also used for keepalive
+control.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>PONG
+id:1
+
+^@</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="req-rep"><a class="link" href="#req-rep">REQ/REP</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section will contain frames that are part ot the REQ/REP scalability protocol.</p>
+</div>
+<div class="sect2">
+<h3 id="query"><a class="link" href="#query">QUERY</a></h3>
+<div class="paragraph">
+<p>This is a frame that should be used for request data from specified resource. It has very
+similar semantics to the HTTP GET request.</p>
+</div>
+<div class="paragraph">
+<p>This is the aspect of the <code>QUERY</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">QUERY
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+destination: /user/2
+
+^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After sending a <code>QUERY</code> frame we should expect an <code>RESPONSE</code> frame from the server
+unless the <code>id</code> header is ommited. The <code>destination</code> header is mandatory and it is
+represented as URI path.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="novelty"><a class="link" href="#novelty">NOVELTY</a></h3>
+<div class="paragraph">
+<p>This is a frame that serves for submit data to be processed to a specified resource. It
+has versy similar semantics that HTTP POST requests.</p>
+</div>
+<div class="paragraph">
+<p>This is the aspect of the <code>NOVELTY</code> frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">NOVELTY
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+content-type: application/edn
+destination: /user/2
+
+[[:db/add 857582744 :username &quot;foobar&quot;]
+ [:db/add 857582744 :password &quot;secret&quot;]]^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After sending a <code>NOVELTY</code> frame we should expect an <code>RESPONSE</code> to be sent back.
+The <code>destination</code> header is mandatory and it is represented as URI path.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="pub-sub"><a class="link" href="#pub-sub">PUB/SUB</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section will contain frames that are part ot the PUB/SUB scalability protocol.</p>
+</div>
+<div class="sect2">
+<h3 id="subscribe"><a class="link" href="#subscribe">SUBSCRIBE</a></h3>
+<div class="paragraph">
+<p>This is a frame that&#8217;s should be used for notify the server that a client want subscribe
+to a specific topic.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">SUBSCRIBE
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+topic: user.notifications
+
+^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The <strong>id</strong> and <strong>topic</strong> headers are mandatory.</p>
+</div>
+<div class="paragraph">
+<p>As consecuence of send this frame, the server should send back to the client the <code>ACK</code>
+frame confirming that the subscription is made successfully.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">ACK
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+topic: user.notifications
+
+^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The implementation of the subscription mechanism is user defined. This spec does not
+covers any low-level aspect. The <code>SUBSCRIBE</code> has just a semantic name. Nothing prevents
+to the user use <code>SUBSCRIBE</code> frames to something different.</p>
+</div>
+<div class="paragraph">
+<p>Then the subscription is established, the server may start send you arbitrary number
+of <code>MESSAGE</code> frames identified by the topic:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">MESSAGE
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+topic: user.notifications
+content-type: application/edn
+
+{:foo &quot;bar&quot;}^@</code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Nothing prevents server send <code>MESSAGE</code> frames independently if you have done a
+subscription or not (ex: the server can start sending notifications to the client at
+any time, no subscription action is nedded). The <code>SUBSCRIBE</code> frame is a semantic frame
+that allows subscription negotiation if the user needs it.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="unsubscribe"><a class="link" href="#unsubscribe">UNSUBSCRIBE</a></h3>
+<div class="paragraph">
+<p>This is a frame that should be used for cancel a subscription.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">UNSUBSCRIBE
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+topic: user.notifications</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As consecuence of send this frame, the server should send back to the client the <code>ACK</code>
+frame confirming that the server had successfully removed the subscription.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="publish"><a class="link" href="#publish">PUBLISH</a></h3>
+<div class="paragraph">
+<p>This is a frame that should be used for publish a message in a specified topic. If a
+client is also subscribed to the topic, it will receive the published message.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">PUBLISH
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+topic: user.notifications
+content-type: application/edn
+
+{:message &quot;content&quot;}^@</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As consecuence of send this frame, the server should send back to the client the <code>ACK</code>
+frame confirming that the publish is done successfully.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">ACK
+id: e11a27d3-4b86-4191-a310-12847fa79d48
+
+^@</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="push-pull"><a class="link" href="#push-pull">PUSH/PULL</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section will contain frames that are part ot the PUSH/PULL scalability protocol.</p>
+</div>
+<div class="sect2">
+<h3 id="put"><a class="link" href="#put">PUT</a></h3>
+<div class="paragraph">
+<p>TBD</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="take"><a class="link" href="#take">TAKE</a></h3>
+<div class="paragraph">
+<p>TBD</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="consume"><a class="link" href="#consume">CONSUME</a></h3>
+<div class="paragraph">
+<p>TBD</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="license"><a class="link" href="#license">License</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>catacumba</em> is licensed under BSD (2-Clause) license:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Copyright (c) 2015 Andrey Antukh &lt;niwi@niwi.nz&gt;
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2015-08-02 18:30:37 EEST
+</div>
+</div>
+</body>
+</html>
