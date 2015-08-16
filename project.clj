@@ -1,4 +1,4 @@
-(defproject funcool/postal "0.1.0-SNAPSHOT"
+(defproject funcool/postal "0.2.0-SNAPSHOT"
   :description "A parser, renderer and validation layer for POSTAL protocol for Clojure and ClojureScript."
   :url "http://github.com/funcool/postal"
   :license {:name "BSD (2-Clause)"
