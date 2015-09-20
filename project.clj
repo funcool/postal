@@ -6,7 +6,8 @@
   :source-paths ["src"]
   :jar-exclusions [#"\.swp|\.swo|user.clj"]
   :javac-options ["-target" "1.8" "-source" "1.8" "-Xlint:-options"]
+  :plugins [[lein-ancient "0.6.7"]]
   :dependencies [[org.clojure/clojure "1.7.0" :scope "provided"]
-                 [org.clojure/clojurescript "1.7.107" :scope "provided"]
+                 [org.clojure/clojurescript "1.7.122" :scope "provided"]
                  [org.clojure/tools.reader "0.10.0-alpha3"]
                  [funcool/cuerdas "0.6.0"]])
