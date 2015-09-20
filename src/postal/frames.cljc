@@ -1,5 +1,6 @@
 (ns postal.frames
-  "A frame types definition.")
+  "A frame types definition."
+  (:refer-clojure :exclude [take])
 
 (defrecord Frame [command headers body])
 
