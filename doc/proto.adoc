@@ -23,19 +23,20 @@ communication protocols (nanomsg, zeromq, etc.).
 == Rationale
 
 The POSTAL protocol is originated from the need of a simple, client-to-server,
-asynchronous, message based protocol for the http layer (communicate browsers with servers
-using message based communication with similar semantics of HTTP).
+asynchronous, message based protocol for the http layer (communicate browsers with
+servers using message based communication with similar semantics of HTTP).
 
-The unique real alternative to POSTAL is _STOMP_ but, the last one is designed to work
-with message brokers with limited set of communication schemes such as topic and queue.
-That communication schemes are very flexible, but mount something like RPC on top of it
-usually adds a great amount of accidental complexity.
+The unique real alternative to POSTAL is _STOMP_ but, the last one is designed to
+work with message brokers with limited set of communication schemes such as topic
+and queue.
+That communication schemes are very flexible, but mount something like RPC on top
+of it usually adds a great amount of accidental complexity.
 
 In summary: _STOMP_ is too much high level protocol.
 
-POSTAL intends to be a client-to-server communication instead client-to-broker (actors
-model) with similar semantis borrowed from HTTP for communicate clients that want send
-asynchronous request to server.
+POSTAL intends to be a client-to-server communication instead client-to-broker
+(actors model) with similar semantis borrowed from HTTP for communicate clients that
+want send asynchronous request to server.
 
 Reliability and backpressure is one of the first goals of the POSTAL protocol.
 
@@ -77,9 +78,9 @@ Some headers MAY be used, and have special meaning, with most frames.
 
 ==== Header: *id*
 
-The `id` header serves for identify messages. It is mainly used by client frames. Frames
-without specified `id` does not return responses. And some frames has `id` as mandatory
-header.
+The `id` header serves for identify messages. It is mainly used by client frames.
+Frames without specified `id` does not return responses. And some frames has `id`
+as mandatory header.
 
 
 ==== Header: *content-type*
@@ -98,8 +99,8 @@ maintain a history of state changes of the header and MAY be ignored.
 
 === Size Limits
 
-To prevent malicious clients from exploiting memory allocation in a server, servers MAY
-place maximum limits on:
+To prevent malicious clients from exploiting memory allocation in a server, servers
+MAY place maximum limits on:
 
 * the number of frame headers allowed in a single frame
 * the maximum length of header lines
@@ -112,7 +113,8 @@ If these limits are exceeded the server SHOULD send the client an ERROR frame.
 
 === HELLO
 
-A POSTAL client initializes the communication with the server sending a `HELLO` frame:
+A POSTAL client initializes the communication with the server sending a `HELLO`
+frame:
 
 [source, text]
 ----
@@ -133,31 +135,10 @@ server: catacumba/0.4.0 (netty)
 ----
 
 
-=== ACK
-
-Is a generic frame that is used for acknowledge the messages received by the server.
-It represents the signal that the server have recived a message. Is a body less
-version of `RESPONSE` frame.
-
-This is aspect of the `ACK` frame:
-
-[source, text]
-----
-ACK
-message-id: e11a27d3-4b86-4191-a310-12847fa79d48
-
-^@
-----
-
-The `ACK` frames should mandatory identify the associated message. So if a message
-sent to the server does not provide any identification id, the `ACK` frame should
-not to be send by server.
-
-
 === ERROR
 
-Is a generic frame that represents a error situation. This kind of messages can be send
-by server when something goes wrong.
+Is a generic frame that represents a error situation. This kind of messages can be
+send by server when something goes wrong.
 
 This is aspect of the `ERROR` frame:
 
@@ -165,35 +146,28 @@ This is aspect of the `ERROR` frame:
 ----
 ERROR
 content-type: application/json
-content-length: 31
-code: 404
 
 {"message": "Does not exists."}^@
 ----
 
-The `ERROR` frame has `code` as mandatory header and it is represents a error code. The
-POSTAL protocol will define a little subset of semantic errors that can be used by
-your application or define your own error codes.
-
 
 === RESPONSE
 
-This is a generic frame that represents a server response to some kind of request. This
-frame is mainly used by REQ/REP scalability protocols explained below.
+This is a generic frame that represents a server response to some kind of request.
+This frame is mainly used by REQ/REP scalability protocols explained below.
 
 This is aspect of the `RESPONSE` frame:
 
 [source, text]
 ----
 RESPONSE
-message-id: e11a27d3-4b86-4191-a310-12847fa79d48
+id: e11a27d3-4b86-4191-a310-12847fa79d48
 content-type: application/json
-content-length: 31
 
 {"id": 1, "first_name": "Yennefer"}^@
 ----
 
-The `message-id` is a mandatory header that allow a client pair the response to the
+The `id` is a mandatory header that allow a client pair the response to the
 previous request frame. If a request message does not comes with `id` attribute,
 the response will not be sent by server.
 
@@ -201,11 +175,11 @@ the response will not be sent by server.
 === MESSAGE
 
 This is a generic frame that represents a server message. This frame is very similar
-purpose that `RESPONSE` but very different semantics. This frame can be sent by server
-in any moment, without client intervention.
+purpose that `RESPONSE` but very different semantics. This frame can be sent by
+server in any moment, without client intervention.
 
-Mainly used for consume messages from subscriptions or from queues. See more PUB/SUB and
-PUSH/PULL scalability protocols.
+Mainly used for consume messages from subscriptions or from queues. See more PUB/SUB
+and PUSH/PULL scalability protocols.
 
 This is aspect of the `RESPONSE` frame:
 
@@ -214,7 +188,6 @@ This is aspect of the `RESPONSE` frame:
 MESSAGE
 subscription: e11a27d3-4b86-4191-a310-12847fa79d48
 content-type: application/json
-content-length: 31
 
 {"id": 1, "first_name": "Yennefer"}^@
 ----
@@ -235,8 +208,8 @@ id: 1
 
 === PONG
 
-This is a client frame that's used for reply the `PING` frames. Also used for keepalive
-control.
+This is a client frame that's used for reply the `PING` frames. Also used for
+keepalive control.
 
 ----
 PONG
@@ -253,8 +226,8 @@ This section will contain frames that are part ot the REQ/REP scalability protoc
 
 === QUERY
 
-This is a frame that should be used for request data from specified resource. It has very
-similar semantics to the HTTP GET request.
+This is a frame that should be used for request data from specified resource. It
+has very similar semantics to the HTTP GET request.
 
 This is the aspect of the `QUERY` frame:
 
@@ -262,20 +235,20 @@ This is the aspect of the `QUERY` frame:
 ----
 QUERY
 id: e11a27d3-4b86-4191-a310-12847fa79d48
-destination: /user/2
+dest: users
 
-^@
+{:id 2}^@
 ----
 
-After sending a `QUERY` frame we should expect an `RESPONSE` frame from the server
-unless the `id` header is ommited. The `destination` header is mandatory and it is
-represented as URI path.
+
+After sending a `QUERY` frame we should expect an `RESPONSE` frame to be sent back.
+The `dest` header is mandatory and its format is explicitly not specified.
 
 
 === NOVELTY
 
-This is a frame that serves for submit data to be processed to a specified resource. It
-has versy similar semantics that HTTP POST requests.
+This is a frame that serves for submit data to be processed to a specified resource.
+It has versy similar semantics that HTTP POST requests.
 
 This is the aspect of the `NOVELTY` frame:
 
@@ -284,14 +257,14 @@ This is the aspect of the `NOVELTY` frame:
 NOVELTY
 id: e11a27d3-4b86-4191-a310-12847fa79d48
 content-type: application/edn
-destination: /user/2
+dest: endpoint
 
 [[:db/add 857582744 :username "foobar"]
  [:db/add 857582744 :password "secret"]]^@
 ----
 
-After sending a `NOVELTY` frame we should expect an `RESPONSE` to be sent back.
-The `destination` header is mandatory and it is represented as URI path.
+After sending a `NOVELTY` frame we should expect an `RESPONSE` frame to be sent back.
+The `dest` header is mandatory and its format is explicitly not specified.
 
 
 == PUB/SUB
@@ -301,35 +274,25 @@ This section will contain frames that are part ot the PUB/SUB scalability protoc
 
 === SUBSCRIBE
 
-This is a frame that's should be used for notify the server that a client want subscribe
-to a specific topic.
+This is a frame that's should be used for notify the server that a client want
+subscribe to a specific topic.
 
 [source, text]
 ----
 SUBSCRIBE
 id: e11a27d3-4b86-4191-a310-12847fa79d48
-topic: user.notifications
+dest: user/notifications
 
-^@
+{:topic "foobar"}^@
 ----
 
-The *id* and *topic* headers are mandatory.
-
-As consecuence of send this frame, the server should send back to the client the `ACK`
-frame confirming that the subscription is made successfully.
-
-[source, text]
-----
-ACK
-id: e11a27d3-4b86-4191-a310-12847fa79d48
-topic: user.notifications
-
-^@
-----
+After sending a `SUBSCRIBE` frame we should expect an `RESPONSE` frame to be sent
+back as confirmation of the subscription or `ERROR` if an error is ocurred. The
+`dest` header is mandatory and its format is explicitly not specified.
 
 The implementation of the subscription mechanism is user defined. This spec does not
-covers any low-level aspect. The `SUBSCRIBE` has just a semantic name. Nothing prevents
-to the user use `SUBSCRIBE` frames to something different.
+covers any low-level aspect. The `SUBSCRIBE` has just a semantic name. Nothing
+prevents to the user use `SUBSCRIBE` frames to something different.
 
 Then the subscription is established, the server may start send you arbitrary number
 of `MESSAGE` frames identified by the topic:
@@ -338,16 +301,15 @@ of `MESSAGE` frames identified by the topic:
 ----
 MESSAGE
 id: e11a27d3-4b86-4191-a310-12847fa79d48
-topic: user.notifications
+topic: foobar
 content-type: application/edn
 
 {:foo "bar"}^@
 ----
 
-WARNING: Nothing prevents server send `MESSAGE` frames independently if you have done a
-subscription or not (ex: the server can start sending notifications to the client at
-any time, no subscription action is nedded). The `SUBSCRIBE` frame is a semantic frame
-that allows subscription negotiation if the user needs it.
+WARNING: Nothing prevents server send `MESSAGE` frames independently if you have
+done a subscription or not (ex: the server can start sending notifications to the
+client at any time, no subscription action is nedded).
 
 
 === UNSUBSCRIBE
@@ -358,11 +320,14 @@ This is a frame that should be used for cancel a subscription.
 ----
 UNSUBSCRIBE
 id: e11a27d3-4b86-4191-a310-12847fa79d48
-topic: user.notifications
+dest: user/notifications
+
+{:topic "foobar"}^@
 ----
 
-As consecuence of send this frame, the server should send back to the client the `ACK`
-frame confirming that the server had successfully removed the subscription.
+After sending a `UNSUBSCRIBE` frame we should expect an `RESPONSE` frame to be sent
+back as confirmation of the subscription or `ERROR` if an error is ocurred. The
+`dest` header is mandatory and its format is explicitly not specified.
 
 
 === PUBLISH
@@ -377,20 +342,13 @@ id: e11a27d3-4b86-4191-a310-12847fa79d48
 topic: user.notifications
 content-type: application/edn
 
-{:message "content"}^@
+{:topic "foobar"
+ :message "content"}^@
 ----
 
-
-As consecuence of send this frame, the server should send back to the client the `ACK`
-frame confirming that the publish is done successfully.
-
-[source, text]
-----
-ACK
-id: e11a27d3-4b86-4191-a310-12847fa79d48
-
-^@
-----
+After sending a `PUBLISH` frame we should expect an `RESPONSE` frame to be sent
+back as confirmation of the subscription or `ERROR` if an error is ocurred. The
+`dest` header is mandatory and its format is explicitly not specified.
 
 
 == PUSH/PULL
