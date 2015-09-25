@@ -118,7 +118,6 @@
                    (assoc frame :headers (assoc (:headers frame)
                                                 (keyword (str/lower (read-header-key reader)))
                                                 (read-header-value reader))))))
-
       (= parsing :body)
       (do
         (reader/read-char reader)
@@ -128,8 +127,8 @@
 
       (= parsing :complete)
       (frames/frame (:command frame)
-                    (:headers frame)
-                    (:body frame))
+                    (:headers frame {})
+                    (:body frame ""))
 
       (= chr-in ::continue)
       (recur (reader/read-char reader)
