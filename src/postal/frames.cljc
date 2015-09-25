@@ -6,66 +6,89 @@
 
 (defn frame
   "A generic frame constructor."
-  ([command headers]
-   (frame command headers ""))
-  ([command headers body]
+  ([command]
+   (frame command "" {}))
+  ([command body]
+   (frame command body ""))
+  ([command body headers]
    (Frame. command headers body)))
 
 (defn query
   "A QUERY frame constructor."
-  ([headers]
-   (query headers ""))
-  ([headers body]
-   (frame :query headers body)))
+  ([body]
+   (query body {}))
+  ([body headers]
+   (frame :query body headers)))
 
 (defn novelty
   "A NOVELTY frame constructor."
-  ([headers]
-   (novelty headers ""))
-  ([headers body]
-   (frame :novelty headers body)))
+  ([body]
+   (novelty body {}))
+  ([body headers]
+   (frame :novelty body headers)))
 
 (defn subscribe
   "A SUBSCRIBE frame constructor."
-  ([headers]
-   (subscribe headers ""))
-  ([headers body]
-   (frame :subscribe headers body)))
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :subscribe body headers)))
 
 (defn unsubscribe
   "A UNSUBSCRIBE frame constructor."
-  ([headers]
-   (unsubscribe headers ""))
-  ([headers body]
-   (frame :unsubscribe headers body)))
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :unsubscribe body headers)))
 
 (defn publish
   "A PUBLISH frame constructor."
-  ([headers]
-   (publish headers ""))
-  ([headers body]
-   (frame :publish headers body)))
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :publish body headers)))
 
 (defn put
   "A PUT frame constructor."
-  ([headers]
-   (put headers ""))
-  ([headers body]
-   (frame :put headers body)))
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :put body headers)))
 
 (defn take
   "A TAKE frame constructor."
-  ([headers]
-   (take headers ""))
-  ([headers body]
-   (frame :take headers body)))
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :take body headers)))
 
 (defn consume
-  "A TAKE frame constructor."
-  ([headers]
-   (consume headers ""))
-  ([headers body]
-   (frame :consume headers body)))
+  "A CONSUME frame constructor."
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :consume body headers)))
+
+(defn response
+  "A RESPONSE frame constructor."
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :response body headers)))
+
+(defn message
+  "A MESSAGE frame constructor."
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :message body headers)))
+
+(defn error
+  "A ERROR frame constructor."
+  ([body]
+   (subscribe body {}))
+  ([body headers]
+   (frame :error body headers)))
 
 (defn frame?
   "Return true if a provided frame is a true
@@ -86,3 +109,10 @@
   [frame]
   (and (frame? frame)
        (= (:command frame) :response)))
+
+(defn message?
+  "Return true if a provided frame is a true
+  instance of Frame and it is of message type."
+  [frame]
+  (and (frame? frame)
+       (= (:command frame) :message)))
