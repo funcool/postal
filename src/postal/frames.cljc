@@ -72,3 +72,17 @@
   instance of Frame type."
   [frame]
   (instance? Frame frame))
+
+(defn error?
+  "Return true if a provided frame is a true
+  instance of Frame and it is of error type."
+  [frame]
+  (and (frame? frame)
+       (= (:command frame) :error)))
+
+(defn response?
+  "Return true if a provided frame is a true
+  instance of Frame and it is of response type."
+  [frame]
+  (and (frame? frame)
+       (= (:command frame) :response)))
