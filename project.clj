@@ -9,4 +9,7 @@
   :plugins [[lein-ancient "0.6.7"]]
   :dependencies [[org.clojure/clojure "1.7.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.122" :scope "provided"]
+                 [com.cognitect/transit-cljs "0.8.225"]
+                 [funcool/cats "1.0.0"]
+                 [funcool/promesa "0.5.1"]
                  [funcool/beicon "0.1.0-SNAPSHOT"]])
