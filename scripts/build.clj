@@ -7,7 +7,7 @@
 (let [start (System/nanoTime)]
   (b/build
    (b/inputs "test" "src")
-   {:main 'postal.parser-tests
+   {:main 'postal.core-tests
     :output-to "out/tests.js"
     :output-dir "out"
     :target :nodejs
