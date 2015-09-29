@@ -1,8 +1,6 @@
-(ns igorle.log
+(ns postal.log
   "A lightweight logging abstraction."
-  #?@(:cljs [(:require-macros [igorle.log :refer [warn trace]])
-             (:require [cljs.core.async :as a]
-                       [cuerdas.core :as str])]))
+  #?(:cljs (:require-macros [postal.log :refer [warn trace]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Global Vars declaration

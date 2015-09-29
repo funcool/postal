@@ -24,6 +24,7 @@
     (s/to-observable bus))
 
   (-send [_ data]
+    (assert (string? data) "data should be string")
     (.send ws data))
 
   (-close [_]
@@ -37,7 +38,7 @@
 
 (defn- websocket*
   [ws]
-  (let [bus (a/bus)]
+  (let [bus (s/bus)]
     (set! (.-onmessage ws) (partial listener bus :socket/message))
     (set! (.-onclose ws) (partial listener bus :socket/close))
     (set! (.-onopen ws) (partial listener bus :socket/open))
@@ -50,6 +51,7 @@
     (s/to-observable busin))
 
   (-send [_ data]
+    (assert (string? data) "data should be string")
     (s/push! busout data))
 
   (-close [_]
@@ -82,6 +84,4 @@
 
 (defn fake-websocket
   [busin busout]
-  (let [busin (s/bus)
-        busout (s/bus)]
-    (FakeWebSocket. busin busout)))
+  (FakeWebSocket. busin busout))

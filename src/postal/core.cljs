@@ -1,14 +1,10 @@
 (ns postal.core
-  (:require-macros [cljs.core.async.macros :refer [go-loop go]])
-  (:require [postal.frames :as pf]
-            [postal.core :as pc]
-            [igorle.socket :as is]
-            [igorle.log :as log :include-macros true]
-            [cuerdas.core :as str]
+  (:require [postal.socket :as ps]
+            [postal.log :as plog :include-macros true]
+            [cognitect.transit :as t]
             [promesa.core :as p]
-            [cljs.core.async :as a]
-            [cats.core :as m]
-            [cats.monad.either :as either]))
+            [beicon.core :as s]
+            [cats.core :as m]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Serializers
@@ -16,11 +12,13 @@
 
 (defn frame-encode
   [data]
-  )
+  (let [w (t/writer :json)]
+    (t/write w data)))
 
 (defn frame-decode
   [data]
-  )
+  (let [r (t/reader :json {:handlers {"u" ->UUID}})]
+    (t/read r data)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Encoding & Decoding
@@ -28,38 +26,36 @@
 
 (defn handle-socket-input
   [client input-bus]
-  (letfn [(decode [message]
-            (let [payload (:payload message)]
-              (assoc message :payload (frame-decode payload))))]
+  (letfn [(decode [{:keys [type payload] :as message}]
+            {:type :client/message
+             :payload (frame-decode payload)})]
     (let [socket (:socket client)
-          socket-stream (is/-stream socket)
-          message-stream (->> socket-stream
-                              (s/filter #(= (:type %) :socket/message))
-                              (s/map #(assoc % :type :message))
-                              (s/map decode)
-                              (s/filter (comp not nil?)))]
-      (s/on-value message-stream #(s/push input-bus %)))))
+          stream (->> (ps/-stream socket)
+                      (s/filter #(= (:type %) :socket/message))
+                      (s/map decode))]
+      (s/on-value stream #(s/push! input-bus %)))))
 
 (declare handshake)
 (declare wait-frame)
 (declare fatal-state!)
+(declare do-handshake)
 
 (defn handle-handshake
   [client input-bus]
   (let [socket (:socket client)
         open (:open client)
-        socket-stream (is/-stream socket)
-        close-stream (s/filter socket-stream #(= (:type %) :socket/close))
-        open-stream (s/filter socket-stream #(= (:type %) :socket/open))]
+        socket-stream (ps/-stream socket)
+        close-stream (s/filter #(= (:type %) :socket/close) socket-stream)
+        open-stream (s/filter #(= (:type %) :socket/open) socket-stream)]
     (letfn [(on-close-event [_]
-              (let [msg {:type :connected :payload false}]
+              (let [msg {:type :client/status :payload {:open false}}]
                 (s/push! input-bus msg)))
             (on-open-event [_]
               (-> (do-handshake client input-bus)
                   (p/then on-handshake-success)
                   (p/catch on-handshake-error)))
             (on-handshake-success [_]
-              (let [msg {:type :connected :payload true}]
+              (let [msg {:type :client/status :payload {:open true}}]
                 (vreset! open true)
                 (s/push! input-bus msg)))
             (on-handshake-error [_]
@@ -69,11 +65,11 @@
       (s/on-value close-stream on-close-event)
       (s/on-value open-stream on-open-event))))
 
-(defn handshake
+(defn do-handshake
   [client]
   (let [frame {:cmd :hello}
         socket (:socket client)]
-    (is/-send sock (frame-encode frame))
+    (ps/-send socket (frame-encode frame))
     (wait-frame client :hello nil)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -95,13 +91,13 @@
   ([uri]
    (client uri {}))
   ([uri options]
-   (let [socket (is/-create uri)
+   (let [socket (ps/-create uri)
          open (volatile! false)
          input-bus (s/bus)
          output-bus (s/bus)
          input-stream (s/to-observable input-bus)
          message-stream (->> input-stream
-                             (s/filter #(= (:type %) :message))
+                             (s/filter #(= (:type %) :client/message))
                              (s/map :payload))
          client (map->Client {:socket socket
                               :options options
@@ -110,7 +106,7 @@
                               :output-bus output-bus
                               :message-stream message-stream})]
      (handle-socket-input client input-bus)
-     (handle-handshake client)
+     (handle-handshake client input-bus)
      client)))
 
 (defn client?
@@ -137,21 +133,18 @@
   action.  This closes the socket and set a client into no
   usable state."
   [client data]
-  (let [socket (:socket client)
-        input-bus (:input-bus client)]
-    (log/warn "The client enters in fatal state")
-
-    (s/push! input-bus {:type :client/error :payload data})
-    (s/end! input-bus)
-    (is/-close sock)))
+  (let [socket (:socket client)]
+        ;; input-bus (:input-bus client)]
+    (plog/warn "The client enters in fatal state")
+    ;; (s/push! input-bus {:type :client/error :payload data})
+    ;; (s/end! input-bus)
+    (ps/-close socket)))
 
 (defn- send-frame!
   [client frame]
-  (m/mlet [frame (wait-frame client :response (:id frame))]
-    ;; TODO: debug
-    (m/return frame)))
-
-(def random-id (comp str random-uuid))
+  (let [socket (:socket client)]
+    (ps/-send socket (frame-encode frame))
+    (wait-frame client :response (:id frame))))
 
 (defn query
   "Sends a QUERY frame to the server."
@@ -160,11 +153,13 @@
   ([client dest data]
    (query client dest data nil))
   ([client dest data opts]
-   (let [frame {:cmd :query
-                :id (random-id)
+   (let [socket (:socket client)
+         frame {:cmd :query
+                :id (random-uuid)
                 :dest dest
                 :data data}]
-     (send-frame! client frame))))
+    (ps/-send socket (frame-encode frame))
+    (wait-frame client :response (:id frame)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
@@ -172,13 +167,17 @@
 
 (defn- wait-frame
   [client frametype msgid]
-  (let [busout (:output-bus client)
-        message-stream (:message-stream client)
-        wait-frames #{:response :error}]
+  (let [message-stream (:message-stream client)
+        wait-frames #{frametype :error}]
     (p/promise
      (fn [resolve reject]
        (let [matchfn #(and (wait-frames (:cmd %)) (= (:id %) msgid))
              stream (->> message-stream
                          (s/filter matchfn)
                          (s/take 1))]
-         (s/subscribe stream #(resolve %) #(reject %)))))))
+         (s/subscribe stream
+                      #(condp = (:cmd %)
+                         frametype (resolve %)
+                         :error (reject %))
+                      #(reject %)
+                      (constantly nil)))))))
