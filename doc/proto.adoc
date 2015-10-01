@@ -1,0 +1,331 @@
+= POSTAL - Protocol Spec.
+Andrey Antukh, <niwi@niwi.nz>
+Version 1.0
+:toc:
+:toc-title:
+:toclevels: 2
+:!numbered:
+:idseparator: -
+:idprefix:
+:source-highlighter: pygments
+:pygments-style: friendly
+:sectlinks:
+
+
+== Abstract
+
+POSTAL is a simple and interoperable protocol designed for asynchronous message based
+client-to-server communication. It is defined as plain-text format for better
+interoperability and intends to be used on top of WebSockets or socket/message based
+communication protocols (nanomsg, zeromq, etc.).
+
+== Rationale
+
+The POSTAL protocol is originated from the need of a simple, client-to-server,
+asynchronous, message based protocol for the http layer (communicate browsers with
+servers using message based communication with similar semantics of HTTP).
+
+The unique real alternative to POSTAL is _STOMP_ but, the last one is designed to
+work with message brokers with limited set of communication schemes such as topic
+and queue.
+That communication schemes are very flexible, but mount something like RPC on top
+of it usually adds a great amount of accidental complexity.
+
+In summary: _STOMP_ is too much high level protocol.
+
+POSTAL intends to be a client-to-server communication instead client-to-broker
+(actors model) with similar semantis borrowed from HTTP for communicate clients that
+want send asynchronous request to server.
+
+
+== Protocol Overview
+
+POSTAL is a frame based protocol with frames modeled as structured messages encoded
+using `transit+json` encoding.
+
+=== Frames
+
+POSTAL is a frame based protocol that assumes a reliable 2-way streaming network
+protocol (such as TCP or WebSockets). THhe client and server will communicate using
+POSTAL frames sent over the stream. A frame's structure looks like:
+
+[source, clojure]
+----
+{:cmd :command
+ :id #uuid "7b3f78dc-ceae-4ac4-9b53-c543409197ab"
+ :data "body"}
+----
+
+The `id` property serves for identify messages. Frames without specified `id` does
+not return responses. And some frames has `id` as mandatory property.
+
+The previus frame looks like this when it is encoded using `transit+json`
+serialization format:
+
+[source, json]
+----
+"[\"^ \",\"~:cmd\",\"~:command\",\"~:id\",\"~u7b3f78dc-ceae-4ac4-9b53-c543409197ab\",\"~:data\",\"body\"]"
+----
+
+== Common Frames
+
+=== :hello
+
+A POSTAL client initializes the communication with the server sending a `:hello`
+frame:
+
+[source, clojure]
+----
+{:cmd :hello}
+----
+
+The server should respond also with `HELLO` frame:
+
+[source, clojure]
+----
+{:cmd :hello
+ :server "catacumba/0.4.0 (netty)"}
+----
+
+=== :error
+
+Is a generic frame that represents a error situation. This kind of messages can be
+send by server when something goes wrong.
+
+This is aspect of the `:error` frame:
+
+[source, clojure]
+----
+{:cmd :error
+ :data {:message "Does not exists"}}
+----
+
+
+=== :response
+
+This is a generic frame that represents a server response to some kind of request.
+
+This is aspect of the `:response` frame:
+
+[source, clojure]
+----
+{:cmd :respnse
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :data {:id: 1, :firstname "Yennefer"}}
+----
+
+The `id` is a mandatory header that allow a client pair the response to the
+previous request frame. If a request message does not comes with `id` attribute,
+the response will not be sent by server.
+
+
+=== :message
+
+This is a generic frame that represents a server message. This frame is very similar
+purpose that `:response` but very different semantics. This frame can be sent by
+server in any moment, without client intervention.
+
+Mainly used for consume messages from subscriptions or from queues. See more PUB/SUB
+and PUSH/PULL scalability protocols.
+
+This is aspect of the `:messages` frame:
+
+[source, clojure]
+----
+{:cmd :message
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :data {:id: 1, :firstname "Yennefer"}}
+----
+
+
+=== :ping
+
+This is a server frame that's used for the keepalive control.
+
+[source, clojure]
+----
+{:cmd :ping
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"}
+----
+
+
+=== :pong
+
+This is a client frame that's used for reply the `:pong` frames. Also used for
+keepalive control.
+
+----
+{:cmd :pong
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"}
+----
+
+
+== REQ/REP
+
+This section will contain frames that are part ot the REQ/REP scalability protocol.
+
+
+=== :query
+
+This is a frame that should be used for request data from specified resource. It
+has very similar semantics to the HTTP GET request.
+
+This is the aspect of the `:query` frame:
+
+[source, clojure]
+----
+{:cmd :query
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :dest :users
+ :data {:id 2}}
+----
+
+After sending a `:query` frame we should expect an `:resource` frame to be sent back.
+The `:dest` property is mandatory.
+
+
+=== :novelty
+
+This is a frame that serves for submit data to be processed to a specified resource.
+It has versy similar semantics that HTTP POST requests.
+
+This is the aspect of the `novelty` frame:
+
+[source, clojure]
+----
+{:cmd :novelty
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :dest :users
+ :data [[:db/add 857582744 :username "foobar"]
+        [:db/add 857582744 :password "secret"]]}
+----
+
+After sending a `:novelty` frame we should expect an `:resource` frame to be sent
+back. The `:dest` property is mandatory.
+
+
+== PUB/SUB
+
+This section will contain frames that are part ot the PUB/SUB scalability protocol.
+
+
+=== :subscribe
+
+This is a frame that's should be used for notify the server that a client want
+subscribe to a specific topic.
+
+[source, clojure]
+----
+{:cmd :subscribe
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :dest :user/notification
+ :data {:id 2}}
+----
+
+After sending a `:subscribe` frame we should expect an `:resource` frame to be sent
+back as confirmation of the subscription or `:error` if an error is ocurred. The
+`:dest` property is mandatory.
+
+The implementation of the subscription mechanism is user defined. This spec does not
+covers any low-level aspect. The `:subscription` has just a semantic name. Nothing
+prevents to the user use `:subscription` frames to something different.
+
+Then the subscription is established, the server may start send you arbitrary number
+of `:message` frames identified by the topic:
+
+[source, clojure]
+----
+{:cmd :message
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :data {:foo "bar"}}
+----
+
+WARNING: Nothing prevents server send `:message` frames independently if you have
+done a subscription or not (ex: the server can start sending notifications to the
+client at any time, no subscription action is nedded).
+
+
+=== UNSUBSCRIBE
+
+This is a frame that should be used for cancel a subscription.
+
+[source, clojure]
+----
+{:cmd :subscribe
+ :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :dest :user/notification}
+----
+
+After sending a `:unsubscribe` frame we should expect an `:response` frame to be
+sent back as confirmation of the subscription or `ERROR` if an error is ocurred.
+The `:dest` property is mandatory.
+
+
+=== :publish
+
+This is a frame that should be used for publish a message in a specified topic. If a
+client is also subscribed to the topic, it will receive the published message.
+
+[source, clojure]
+----
+{:cmd :publish
+ :id #uuid "e32a27d3-4b86-4191-a310-12847fa79d48"
+ :subscriptionid #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :dest :user/notification
+ :data {:foo "bar"}}
+----
+
+After sending a `:publish` frame we should expect an `:response` frame to be sent
+back as confirmation of the subscription or `:error` if an error is ocurred. The
+`:dest` property is mandatory.
+
+
+== PUSH/PULL
+
+This section will contain frames that are part ot the PUSH/PULL scalability protocol.
+
+
+=== PUT
+
+TBD
+
+
+=== TAKE
+
+TBD
+
+
+=== CONSUME
+
+TBD
+
+
+
+== License
+
+----
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org/>
+----
