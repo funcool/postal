@@ -120,11 +120,6 @@
   (let [open (:open client)]
     (not @open)))
 
-(defn frame-with-id?
-  "A predicate for check that frame comes with id."
-  [frame]
-  (boolean (:id frame)))
-
 (defn- fatal-state!
   "Set a client in fatal state.
 
