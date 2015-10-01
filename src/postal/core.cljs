@@ -139,7 +139,7 @@
     (wait-frame client :response (:id frame))))
 
 (defn query
-  "Sends a QUERY frame to the server."
+  "Sends a :query frame to the server."
   ([client dest]
    (query client dest nil nil))
   ([client dest data]
