@@ -156,9 +156,9 @@
 (defn novelty
   "Sends a :novelty frame to the server."
   ([client dest]
-   (query client dest nil nil))
+   (novelty client dest nil nil))
   ([client dest data]
-   (query client dest data nil))
+   (novelty client dest data nil))
   ([client dest data opts]
    (let [socket (:socket client)
          frame {:cmd :novelty
