@@ -172,6 +172,8 @@
 ;; Helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(def ^:private noop (constantly nil))
+
 (defn- wait-frame
   [client frametype msgid]
   (let [message-stream (:message-stream client)
@@ -187,4 +189,4 @@
                          frametype (resolve %)
                          :error (reject %))
                       #(reject %)
-                      (constantly nil)))))))
+                      noop))))))
