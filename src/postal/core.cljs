@@ -129,10 +129,7 @@
   usable state."
   [client data]
   (let [socket (:socket client)]
-        ;; input-bus (:input-bus client)]
     (plog/warn "The client enters in fatal state")
-    ;; (s/push! input-bus {:type :client/error :payload data})
-    ;; (s/end! input-bus)
     (ps/-close socket)))
 
 (defn- send-frame!
