@@ -236,7 +236,8 @@ of `:message` frames identified by the topic:
 [source, clojure]
 ----
 {:cmd :message
- :id #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
+ :id #uuid "e22a27d3-4b86-4191-a310-12847fa79d48"
+ :subscription #uuid "e22a27d3-4b86-4191-a310-12847fa79d48"
  :data {:foo "bar"}}
 ----
 
@@ -270,7 +271,6 @@ client is also subscribed to the topic, it will receive the published message.
 ----
 {:cmd :publish
  :id #uuid "e32a27d3-4b86-4191-a310-12847fa79d48"
- :subscriptionid #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
  :dest :user/notification
  :data {:foo "bar"}}
 ----
