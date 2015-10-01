@@ -153,6 +153,21 @@
     (ps/-send socket (frame-encode frame))
     (wait-frame client :response (:id frame)))))
 
+(defn novelty
+  "Sends a :novelty frame to the server."
+  ([client dest]
+   (query client dest nil nil))
+  ([client dest data]
+   (query client dest data nil))
+  ([client dest data opts]
+   (let [socket (:socket client)
+         frame {:cmd :novelty
+                :id (random-uuid)
+                :dest dest
+                :data data}]
+    (ps/-send socket (frame-encode frame))
+    (wait-frame client :response (:id frame)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
