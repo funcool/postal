@@ -168,6 +168,53 @@
     (ps/-send socket (frame-encode frame))
     (wait-frame client :response (:id frame)))))
 
+(defn- send-subscription-request
+  [client id dest data]
+  (let [socket (:socket client)
+        frame {:cmd :novelty
+               :id id
+               :dest dest
+               :data data}]
+    (ps/-send socket (frame-encode frame))
+    (wait-frame client :response id)))
+
+(defn subscribe
+  "Return a lazy stream that will subscribe to the server
+  when an subscription is attached."
+  ([client dest]
+   (subscribe client dest nil nil))
+  ([client dest data]
+   (subscribe client dest data nil))
+  ([client dest data opts]
+   (let [id (random-uuid)]
+     (s/create (fn [sink]
+                 (let [stream (->> (:message-stream client)
+                                   (s/filter #(= (:cmd %) :message))
+                                   (s/filter #(= (:subscription %) id)))
+                       unsub (s/subscribe stream #(sink %) #(sink %) #(sink nil))]
+                   (-> (send-subscription-request client id dest data)
+                       (p/catch (fn [error]
+                                  (unsub)
+                                  (if (instance? js/Error error)
+                                    (sink error)
+                                    (sink (ex-info "Error" error))))))
+                   unsub))))))
+
+(defn publish
+  "Sends a :publish frame to the server."
+  ([client dest]
+   (publish client dest nil nil))
+  ([client dest data]
+   (publish client dest data nil))
+  ([client dest data opts]
+   (let [socket (:socket client)
+         frame {:cmd :publish
+                :id (random-uuid)
+                :dest dest
+                :data data}]
+    (ps/-send socket (frame-encode frame))
+    (wait-frame client :response (:id frame)))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
