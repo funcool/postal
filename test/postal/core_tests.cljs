@@ -60,11 +60,33 @@
       (s/push! busin {:type :socket/open})
       (m/mlet [frame (to-promise busout)
                :let [frame (pc/frame-decode frame)]]
+        (t/is (= (:cmd frame) :query))
+        (t/is (= (:data frame) nil))
         (s/push! busin {:type :socket/message
                         :payload (pc/frame-encode
                                   {:cmd :response
                                    :id (:id frame)
                                    :data "foobar"})}))
+      )))
+
+(t/deftest novelty-frame-success-test
+  (t/async done
+    (let [[busin busout sock client] (make-client)]
+      (m/mlet [frame (send-handshake sock)
+               result (pc/novelty client :users {:id 1})]
+        (t/is (= (:data result) {:ok true}))
+        (done))
+
+      (s/push! busin {:type :socket/open})
+      (m/mlet [frame (to-promise busout)
+               :let [frame (pc/frame-decode frame)]]
+        (t/is (= (:cmd frame) :novelty))
+        (t/is (= (:data frame) {:id 1}))
+        (s/push! busin {:type :socket/message
+                        :payload (pc/frame-encode
+                                  {:cmd :response
+                                   :id (:id frame)
+                                   :data {:ok true}})}))
       )))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
