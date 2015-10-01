@@ -41,53 +41,94 @@
         client (pc/client sock)]
     [busin busout sock client]))
 
-(t/deftest error-on-handshake-test
-  (t/async done
-    (let [[busin busout sock client] (make-client)]
-      (m/mlet [_ (send-handshake sock :error)]
-        (t/is (pc/closed? client))
-        (done))
-      (s/push! busin {:type :socket/open}))))
+;; (t/deftest error-on-handshake-test
+;;   (t/async done
+;;     (let [[busin busout sock client] (make-client)]
+;;       (m/mlet [_ (send-handshake sock :error)]
+;;         (t/is (pc/closed? client))
+;;         (done))
+;;       (s/push! busin {:type :socket/open}))))
 
-(t/deftest query-frame-success-test
+;; (t/deftest query-frame-success-test
+;;   (t/async done
+;;     (let [[busin busout sock client] (make-client)]
+;;       (m/mlet [frame (send-handshake sock)
+;;                result (pc/query client "/foobar")]
+;;         (t/is (= (:data result) "foobar"))
+;;         (done))
+
+;;       (s/push! busin {:type :socket/open})
+;;       (m/mlet [frame (to-promise busout)
+;;                :let [frame (pc/frame-decode frame)]]
+;;         (t/is (= (:cmd frame) :query))
+;;         (t/is (= (:data frame) nil))
+;;         (s/push! busin {:type :socket/message
+;;                         :payload (pc/frame-encode
+;;                                   {:cmd :response
+;;                                    :id (:id frame)
+;;                                    :data "foobar"})}))
+;;       )))
+
+;; (t/deftest novelty-frame-success-test
+;;   (t/async done
+;;     (let [[busin busout sock client] (make-client)]
+;;       (m/mlet [frame (send-handshake sock)
+;;                result (pc/novelty client :users {:id 1})]
+;;         (t/is (= (:data result) {:ok true}))
+;;         (done))
+
+;;       (s/push! busin {:type :socket/open})
+;;       (m/mlet [frame (to-promise busout)
+;;                :let [frame (pc/frame-decode frame)]]
+;;         (t/is (= (:cmd frame) :novelty))
+;;         (t/is (= (:data frame) {:id 1}))
+;;         (s/push! busin {:type :socket/message
+;;                         :payload (pc/frame-encode
+;;                                   {:cmd :response
+;;                                    :id (:id frame)
+;;                                    :data {:ok true}})}))
+;;       )))
+
+
+(t/deftest subscribe-acction-test
   (t/async done
     (let [[busin busout sock client] (make-client)]
-      (m/mlet [frame (send-handshake sock)
-               result (pc/query client "/foobar")]
-        (t/is (= (:data result) "foobar"))
-        (done))
+      (m/mlet [frame (send-handshake sock)]
+        (let [stream (pc/subscribe client :users)
+              stream (s/log "foobar" stream)
+              values (atom [])]
+          (s/subscribe (s/take 2 stream)
+                       #(swap! values conj %)
+                       (constantly nil)
+                       (fn []
+                         (t/is (= 2 (count @values)))))))
 
       (s/push! busin {:type :socket/open})
-      (m/mlet [frame (to-promise busout)
-               :let [frame (pc/frame-decode frame)]]
-        (t/is (= (:cmd frame) :query))
-        (t/is (= (:data frame) nil))
-        (s/push! busin {:type :socket/message
-                        :payload (pc/frame-encode
-                                  {:cmd :response
-                                   :id (:id frame)
-                                   :data "foobar"})}))
-      )))
 
-(t/deftest novelty-frame-success-test
-  (t/async done
-    (let [[busin busout sock client] (make-client)]
-      (m/mlet [frame (send-handshake sock)
-               result (pc/novelty client :users {:id 1})]
-        (t/is (= (:data result) {:ok true}))
-        (done))
-
-      (s/push! busin {:type :socket/open})
-      (m/mlet [frame (to-promise busout)
-               :let [frame (pc/frame-decode frame)]]
-        (t/is (= (:cmd frame) :novelty))
-        (t/is (= (:data frame) {:id 1}))
-        (s/push! busin {:type :socket/message
-                        :payload (pc/frame-encode
-                                  {:cmd :response
-                                   :id (:id frame)
-                                   :data {:ok true}})}))
-      )))
+      (m/mlet [frame1 (to-promise busout)
+               :let [frame1 (pc/frame-decode frame1)
+                     _ (t/is (= (:cmd frame1) :subscribe))
+                     _ (t/is (= (:dest frame1) :users))
+                     _ (js/setTimeout
+                        (fn []
+                          (s/push! busin {:type :socket/message
+                                          :payload (pc/frame-encode
+                                                    {:cmd :message
+                                                     :id (random-uuid)
+                                                     :subscription (:id frame1)
+                                                     :data {:foo 1}})})
+                          (s/push! busin {:type :socket/message
+                                          :payload (pc/frame-encode
+                                                    {:cmd :message
+                                                     :id (random-uuid)
+                                                     :subscription (:id frame1)
+                                                     :data {:foo 1}})}))
+                        0)]
+               frame2 (to-promise busout)
+               :let [frame2 (pc/frame-decode frame2)]]
+        (t/is (= (:cmd frame2) :unsubscribe))
+        (t/is (= (:id frame2) (:id frame1)))
+        (done)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Initial Setup & Entry Point

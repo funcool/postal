@@ -171,10 +171,19 @@
 (defn- send-subscription-request
   [client id dest data]
   (let [socket (:socket client)
-        frame {:cmd :novelty
+        frame {:cmd :subscribe
                :id id
                :dest dest
                :data data}]
+    (ps/-send socket (frame-encode frame))
+    (wait-frame client :response id)))
+
+(defn- send-dessubscription-request
+  [client id dest]
+  (let [socket (:socket client)
+        frame {:cmd :unsubscribe
+               :id id
+               :dest dest}]
     (ps/-send socket (frame-encode frame))
     (wait-frame client :response id)))
 
@@ -187,18 +196,20 @@
    (subscribe client dest data nil))
   ([client dest data opts]
    (let [id (random-uuid)]
-     (s/create (fn [sink]
-                 (let [stream (->> (:message-stream client)
-                                   (s/filter #(= (:cmd %) :message))
-                                   (s/filter #(= (:subscription %) id)))
-                       unsub (s/subscribe stream #(sink %) #(sink %) #(sink nil))]
-                   (-> (send-subscription-request client id dest data)
-                       (p/catch (fn [error]
-                                  (unsub)
-                                  (if (instance? js/Error error)
-                                    (sink error)
-                                    (sink (ex-info "Error" error))))))
-                   unsub))))))
+     (s/create
+      (fn [sink]
+        (let [stream (->> (:message-stream client)
+                          (s/filter #(= (:cmd %) :message))
+                          (s/filter #(= (:subscription %) id)))
+              unsub (s/subscribe stream #(sink %) #(sink %) #(sink nil))]
+          (-> (send-subscription-request client id dest data)
+              (p/catch (fn [error]
+                         (unsub)
+                         (if (instance? js/Error error)
+                           (sink error)
+                           (sink (ex-info "Error" error))))))
+          (fn []
+            (send-dessubscription-request client id dest))))))))
 
 (defn publish
   "Sends a :publish frame to the server."
