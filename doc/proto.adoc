@@ -237,7 +237,7 @@ of `:message` frames identified by the topic:
 ----
 {:cmd :message
  :id #uuid "e22a27d3-4b86-4191-a310-12847fa79d48"
- :subscription #uuid "e22a27d3-4b86-4191-a310-12847fa79d48"
+ :subscription #uuid "e11a27d3-4b86-4191-a310-12847fa79d48"
  :data {:foo "bar"}}
 ----
 
