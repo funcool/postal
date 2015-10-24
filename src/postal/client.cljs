@@ -7,6 +7,10 @@
             [httpurr.status :as http-status]
             [httpurr.client.xhr :as xhr]))
 
+(def ^:private
+  +default-headers+
+  {"content-type" "application/transit+json"})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Data encoding/decoding
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -22,27 +26,8 @@
     (t/write w data)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Encoding & Decoding
+;; Implementation Details
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defrecord Client [headers method url])
-
-(defn client
-  "Creates a new client instance from socket."
-  ([url]
-   (client url {}))
-  ([url {:keys [headers method] :or {headers {} method :put}}]
-   (Client. headers method url)))
-
-(defn client?
-  "Return true if a privided client is instance
-  of Client type."
-  [client]
-  (instance? Client client))
-
-(def ^:private
-  +default-headers+
-  {"content-type" "application/transit+json"})
 
 (defn- process-response
   [response]
@@ -61,6 +46,39 @@
     (if (= :method :get)
       (merge req {:query-string (str "d=" (b64/encodeString data true))})
       (merge req {:body data}))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The basic client interface.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defrecord Client [headers method url])
+
+(defn client
+  "Creates a new client instance from socket."
+  ([url]
+   (client url {}))
+  ([url {:keys [headers method] :or {headers {} method :put}}]
+   (Client. (atom headers) method url)))
+
+(defn client?
+  "Return true if a privided client is instance
+  of Client type."
+  [client]
+  (instance? Client client))
+
+(defn update-headers!
+  "Update the headers on the client instance."
+  [c headers]
+  {:pre [(client? c)]}
+  (let [ha (:headers c)]
+    (swap! ha merge headers)))
+
+(defn reset-headers!
+  "Reset the headers on the client instance."
+  [c headers]
+  {:pre [(client? c)]}
+  (let [ha (:headers c)]
+    (reset! ha headers)))
 
 (defn send!
   [client {:keys [type dest data headers] :as opts}]
