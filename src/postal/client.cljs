@@ -40,7 +40,7 @@
 
 (defn- prepare-request
   [client data]
-  (let [req {:headers (merge +default-headers+ (:headers client))
+  (let [req {:headers (merge +default-headers+ @(:headers client))
              :method (:method client)
              :url (:url client)}]
     (if (= :method :get)
