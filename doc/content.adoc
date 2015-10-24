@@ -17,7 +17,7 @@ _postal_ is a simple *postal* protocol client for _ClojureScript_.
 
 === Rationale
 
-The tipical web application follows the api REST architecture, but the main
+The tipical web application usually follows the api REST architecture, but the main
 problem of that is that is bound directly to the HTTP semantics that are not
 always coherent or not always clear how to use.
 
@@ -54,7 +54,52 @@ dependency vector on your *_project.clj_* file:
 
 == Getting Started
 
-This section intends to explain how to get _postal_ up and running.
+The *postal* interface is really simple. The first step for use it, just define
+a client instance:
+
+[source, clojure]
+----
+(require '[postal.client :as pc])
+
+(def c (pc/client "http://yourser.ver/end/point"))
+----
+
+The client is stateless, so you can define it globally without any problem. It only
+stores the initial configuration.
+
+By default it uses "PUT" http connection for send messages to backend. Is should be
+also a default value in the backend but you can change it using the second optional
+parameter to the client function:
+
+[source, client]
+----
+(def c (pc/client uri {:method :get}))
+----
+
+The "GET" method allows send the messages using http GET request using query string
+parameter. This in some circumstances enable more facilities that it can be used
+in cross domain without specially setup CORS.
+
+Additionally, you can setup initial http headers to use, using the `:headers`
+option. And them can be updated or reset after client definition using
+`postal.client/update-headers!` or `postal.client/reset-headers!`.
+
+And finally, just use it using the public api. It there an example performing a
+`:query` request:
+
+[source, clojure]
+----
+(require '[promesa.core :as p])
+
+(p/then (pc/query c :users {:id 1})
+        (fn [{:keys [data] :as msg}]
+          (println "User: " data)))
+----
+
+You can notice that `query` function just return a promise that will be resolved
+with the response message or rejected with message if an `:error` message is
+returned. It there also can be rejected with an exception object if something
+foreign to transport is happens (message serialization error as example).
 
 
 == FAQ
