@@ -2,6 +2,7 @@
   (:require [cognitect.transit :as t]
             [promesa.core :as p]
             [cats.core :as m]
+            [goog.crypt.base64 :as b64]
             [httpurr.client :as http]
             [httpurr.status :as http-status]
             [httpurr.client.xhr :as xhr]))
@@ -52,20 +53,23 @@
         (p/resolved message)))
     (p/rejected (ex-info "Unexpected" response))))
 
+(defn- prepare-request
+  [client data]
+  (let [req {:headers (merge +default-headers+ (:headers client))
+             :method (:method client)
+             :url (:url client)}]
+    (if (= :method :get)
+      (merge req {:query-string (str "d=" (b64/encodeString data true))})
+      (merge req {:body data}))))
+
 (defn send!
   [client {:keys [type dest data headers] :as opts}]
   {:pre [(or (map? data)
              (nil? data))
          (keyword? dest)
          (client? client)]}
-  (let [hds (merge +default-headers+
-                   (:headers client))
-        req {:url (:url client)
-             :method (:method client)
-             :body (encode {:data data
-                            :dest dest
-                            :type type})
-             :headers hds}]
+  (let [data (encode {:data data :dest dest :type type})
+        req (prepare-request client data)]
     (-> (http/send! xhr/client req)
         (p/then process-response))))
 
