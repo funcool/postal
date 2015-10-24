@@ -1,0 +1,162 @@
+= postal - a postal client for clojurescript
+Andrey Antukh, <niwi@niwi.nz>
+v0.2.0
+:toc: left
+:!numbered:
+:idseparator: -
+:idprefix:
+:source-highlighter: pygments
+:pygments-style: friendly
+:sectlinks:
+
+
+== Introduction
+
+_postal_ is a simple *postal* protocol client for _ClojureScript_.
+
+
+=== Rationale
+
+The tipical web application follows the api REST architecture, but the main
+problem of that is that is bound directly to the HTTP semantics that are not
+always coherent or not always clear how to use.
+
+This is a client library that implements the link:https://funcool.github.io/catacumba/latest/postal.html[postal protocol].
+And allows consume APIs using rich and user defined messages on top of http.
+
+The general idea behind the protocol and this library is borrowed from
+link:https://facebook.github.io/relay/[Facebook Relay] and
+link:http://netflix.github.io/falcor/[Netflix's Falcor].
+The main differents with them is that this library only represents the transport
+layer, so it's is nonobstructive and not copupled with concrete framework.
+
+This means that you can use it with any <<postal-servers, *postal* protocol
+compliant servers>>. One of the great examples where this library fits in a
+perfection is a transport layer for
+link:https://github.com/omcljs/om/wiki/Quick-Start-(om.next)[Om.Next].
+
+
+=== Project Maturity
+
+Since _postal_ is a young project there can be some API breakage.
+
+
+=== Install
+
+The simplest way to use _postal_ in a clojure project, is by including it in the
+dependency vector on your *_project.clj_* file:
+
+[source,clojure]
+----
+[funcool/postal "0.2.0"]
+----
+
+
+== Getting Started
+
+This section intends to explain how to get _postal_ up and running.
+
+
+== FAQ
+
+=== Is it a replacement for WebSockets?
+
+In general NO. This library/protocol does not intends to replace any existing
+bi-directional protocols/messaging-systems.
+
+WebSockets are very powerfull messaging mechanism but it has its own problems
+(no follows http for authentication handling, to much low-level and implies
+architecture changes on your application).
+
+With the upcoming http2 and already existing spdy, most of the performance
+problems of the http1.x are solved. So, the majority of the standard use of
+websockets can be easily soved using http (http2/spdy).
+
+
+=== Should I use HTTP2/SPDY?
+
+No, but is highly recommeded.
+
+At this moment is not necesary that you server to have the http2/spdy support,
+is more that enough putting your application behind an http proxy like nginx that
+already supports SPDY and http2 support is upcoming.
+
+http2/spdy offers connection multiplexing allowing use one unique persistent
+connection handle all required context, completly eliminating the overhead of
+creating and destroyng connectons. With that you can make multiple and repeated
+http connections without performance issues.
+
+
+== Developers Guide
+
+=== Philosophy
+
+Five most important rules:
+
+- Beautiful is better than ugly.
+- Explicit is better than implicit.
+- Simple is better than complex.
+- Complex is better than complicated.
+- Readability counts.
+
+All contributions to _postal_ should keep these important rules in mind.
+
+
+=== Contributing
+
+Unlike Clojure and other Clojure contributed libraries _postal_ does not have many
+restrictions for contributions. Just open an issue or pull request.
+
+
+=== Source Code
+
+_postal_ is open source and can be found on
+link:https://github.com/funcool/catacumba[github].
+
+You can clone the public repository with this command:
+
+[source,text]
+----
+git clone https://github.com/funcool/postal
+----
+
+=== Run tests
+
+For running tests just execute this:
+
+[source, text]
+----
+lein test
+----
+
+
+=== License
+
+_postal_ is under public domain:
+
+----
+This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to <http://unlicense.org/>
+----
