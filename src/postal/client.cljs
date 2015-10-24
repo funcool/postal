@@ -52,8 +52,8 @@
         (p/resolved message)))
     (p/rejected (ex-info "Unexpected" response))))
 
-(defn- send-message
-  [client type dest data {:keys [headers] :as opts}]
+(defn send!
+  [client {:keys [type dest data headers] :as opts}]
   {:pre [(or (map? data)
              (nil? data))
          (keyword? dest)
@@ -76,7 +76,10 @@
   ([client dest data]
    (query client dest data {}))
   ([client dest data opts]
-   (send-message client :query dest data opts)))
+   (send! client (merge {:type :query
+                         :dest dest
+                         :data data}
+                        opts))))
 
 (defn novelty
   "Sends a novelty message to a server."
@@ -85,4 +88,7 @@
   ([client dest data]
    (query client dest data {}))
   ([client dest data opts]
-   (send-message client :novelty dest data opts)))
+   (send! client (merge {:type :novelty
+                         :dest dest
+                         :data data}
+                        opts))))
