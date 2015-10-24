@@ -71,7 +71,7 @@ By default it uses "PUT" http connection for send messages to backend. Is should
 also a default value in the backend but you can change it using the second optional
 parameter to the client function:
 
-[source, client]
+[source, clojure]
 ----
 (def c (pc/client uri {:method :get}))
 ----
@@ -100,6 +100,64 @@ You can notice that `query` function just return a promise that will be resolved
 with the response message or rejected with message if an `:error` message is
 returned. It there also can be rejected with an exception object if something
 foreign to transport is happens (message serialization error as example).
+
+
+== Event-Source
+
+In some curcumstances the request/response patterns is not enough and you want
+get notifications from the backend in a server-push manener. In this case we have
+two alternatives: WebSockets and EventSource.
+
+WebSocket offers bi-directional communication but maybe implies infraestructure
+changes on your application, it to much low level and we don't need a bi-directional
+transport because using http we only miss the server-push notifications. For this
+case *EventSource* fits perfectly and it just uses plain http without special
+things that will make things easier.
+
+This library exposes a simple way to request a subscription and handle the incoming
+messages using event-source mechanism and
+link:https://github.com/funcool/beicon[beicon library] (wrapper over rxjs).
+
+[source, clojure]
+----
+(require '[beicon.core :as s])
+
+(def c (pc/client "http://yourser.ver/api"))
+(def sub (pc/subscribe c :timeupdate {:some "additional data"}))
+
+(def stream
+  (-> (:stream sub)
+      (s/throttle 1000)))
+
+(s/on-value stream (fn [message]
+                     (println "Received: " message)))
+----
+
+You can close a subscription just calling the `close!` function:
+
+[source, clojure]
+----
+(pc/close! sub)
+----
+
+This will close the connection and the stream, removing all existing stream
+subscriptions.
+
+The downside of using EventSource (like as with WebSockets) is that its api
+does not allows append additional headers. The api is very limited for that. So
+you have two ways to do it:
+
+1. Using the implicit authentication using cookies; that only works if your endpoint
+is in the same domain (no cookies send in a cross domain request).
+
+2. Using a ticket based communication with single use tockens (just make a query
+request for obtain a token and later making the subscription request passing the
+token using and additional query parameter:
+
+[source, clojure]
+----
+(def sub (pc/subscribe :timeupdate nil {:params {:token my-token}}))
+----
 
 
 == FAQ
