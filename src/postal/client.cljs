@@ -3,11 +3,14 @@
             [promesa.core :as p]
             [beicon.core :as s]
             [goog.crypt.base64 :as b64]
+            [goog.events :as events]
             [httpurr.client :as http]
             [httpurr.status :as http-status]
             [httpurr.client.xhr :as xhr])
-  (:import goog.Uri.QueryData
-           goog.Uri))
+  (:import [goog.net WebSocket]
+           [goog.net.WebSocket EventType]
+           [goog.Uri QueryData]
+           [goog Uri Timer]))
 
 (def ^:private
   +default-headers+
@@ -139,30 +142,52 @@
 ;; EventSource
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defprotocol ISubscription
-  (-stream [_] "Get the stream")
-  (-close [_] "Close subscription"))
+(defn socket
+  ([client dest]
+   (socket client dest nil nil))
+  ([client dest data]
+   (socket client dest data nil))
+  ([client dest data {:keys [params] :or {params {}}}]
+   (let [req (prepare-request client data :get params)
+         uri (Uri. (:url req))]
+     (.setQuery uri (:query-string req))
+     (.setScheme uri (if (= (.getScheme uri) "http") "ws" "wss"))
+     (let [ws (WebSocket. (.toString uri))
+           timer (Timer. 5000)
+           busin (s/bus)
+           streamin (s/filter #(not= (:type %) :ping) busin)
+           busout (s/bus)]
+       (letfn [(on-ws-message [event]
+                 (let [frame (decode (.-data event))]
+                   (s/push! busin frame)))
+               (on-ws-error [event]
+                 (s/error! busin event)
+                 (.close ws))
+               (on-timer-tick [_]
+                 (let [frame {:type :ping}]
+                   (s/push! busout frame)))
+               (on-busout-value [msg]
+                 (let [data (encode msg)]
+                   (.send ws data)))
+               (on-busout-end []
+                 (.close ws))]
+         (s/on-end busout on-busout-end)
+         (s/on-value busout on-busout-value)
 
-(deftype Subscription [bus closed evs]
-  (-stream [_]
-    (s/to-observable bus))
-  (-close [_]
-    (.close evs)
-    (s/end! bus)))
+         (events/listen ws EventType.MESSAGE on-ws-message)
+         (events/listen ws EventType.ERROR on-ws-error)
+         (events/listen timer Timer.TICK on-timer-tick)
+
+         [streamin busout])))))
 
 (defn subscribe
-  [client dest data {:keys [params] :or {params {}}}]
-  (let [req (prepare-request client data :get params)
-        uri (Uri. (:url req))
-        bus (s/bus)]
-    (.setQuery uri (:query-string req))
-    (letfn [(on-message [event]
-              (let [message (decode (.-data event))]
-                (s/push bus message)))
-            (on-error [event]
-              (s/error! bus event))]
-      (let [evs (js/EventSOurce (.toString uri))]
-        (.addEventListener evs "open" on-open)
-        (.addEventListener evs "message" on-message)
-        (.addEventListener evs "error" on-error)
-        (Subscription. bus (atom false) evs)))))
+  ([client dest]
+   (subscribe client dest nil nil))
+  ([client dest data]
+   (subscribe client dest data nil))
+  ([client dest data {:keys [params] :or {params {}} :as opts}]
+   (let [[in out] (socket client dest data opts)
+         bus (s/bus)]
+     (s/subscribe in #(s/push! bus %) #(s/error! bus %) #(s/end! bus))
+     (s/on-end bus #(s/end! out))
+     bus)))
