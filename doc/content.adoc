@@ -147,8 +147,7 @@ You can close a subscription just ending the message bus:
 This will close the connection and the stream, removing all existing stream
 subscriptions.
 
-You also can open a bi-directional socket to the backend. It just works in the same
-way as subscribe, but using `socket` function:
+You also can open a bi-directional socket to the backend using `socket` function:
 
 [source, clojure]
 ----
@@ -190,8 +189,6 @@ token using and additional query parameter:
 ----
 (def sub (pc/subscribe :timeupdate nil {:params {:token my-token}}))
 ----
-
-
 
 
 == FAQ
@@ -260,7 +257,8 @@ For running tests just execute this:
 
 [source, text]
 ----
-lein test
+./scripts/build
+node ./out/tests.js
 ----
 
 
