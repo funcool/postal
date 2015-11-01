@@ -143,6 +143,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn socket
+  "Sends a :socket frame to the server and opens
+  bi-direction websocket connection.
+
+  This function returns a vector of two streams,
+  first for input messages and second for output.
+
+  You can close the socket just ending the output
+  stream."
   ([client dest]
    (socket client dest nil nil))
   ([client dest data]
@@ -190,6 +198,12 @@
          [streamin busout])))))
 
 (defn subscribe
+  "Sends a :subscribe frame to the server and open an
+  uni-directional websocket connection.
+
+  This function returns one stream for read messages
+  from backend. You can close the subscription sockets
+  just ending the stream."
   ([client dest]
    (subscribe client dest nil nil))
   ([client dest data]
