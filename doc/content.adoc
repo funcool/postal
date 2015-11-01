@@ -147,22 +147,6 @@ You can close a subscription just ending the message bus:
 This will close the connection and the stream, removing all existing stream
 subscriptions.
 
-The downside of using WebSocket (like as with EventSource) is that its api
-does not allows append additional headers. The api is very limited for that. So
-you have two ways to do it:
-
-1. Using the implicit authentication using cookies; that only works if your endpoint
-is in the same domain (no cookies send in a cross domain request).
-
-2. Using a ticket based communication with single use tockens (just make a query
-request for obtain a token and later making the subscription request passing the
-token using and additional query parameter:
-
-[source, clojure]
-----
-(def sub (pc/subscribe :timeupdate nil {:params {:token my-token}}))
-----
-
 You also can open a bi-directional socket to the backend. It just works in the same
 way as subscribe, but using `socket` function:
 
@@ -187,6 +171,27 @@ way as subscribe, but using `socket` function:
 ----
 
 And you can close the socket just ending the output bus with `s/end!` function.
+
+
+== Auth
+
+The downside of using WebSocket (like as with EventSource) is that its api
+does not allows append additional headers. The api is very limited for that. So
+you have two ways to do it:
+
+1. Using the implicit authentication using cookies; that only works if your endpoint
+is in the same domain (no cookies send in a cross domain request).
+
+2. Using a ticket based communication with single use tockens (just make a query
+request for obtain a token and later making the subscription request passing the
+token using and additional query parameter:
+
+[source, clojure]
+----
+(def sub (pc/subscribe :timeupdate nil {:params {:token my-token}}))
+----
+
+
 
 
 == FAQ
