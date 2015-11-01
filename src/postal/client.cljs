@@ -129,9 +129,9 @@
 (defn novelty
   "Sends a novelty message to a server."
   ([client dest]
-   (query client dest nil {}))
+   (novelty client dest nil {}))
   ([client dest data]
-   (query client dest data {}))
+   (novelty client dest data {}))
   ([client dest data opts]
    (send! client (merge {:type :novelty
                          :dest dest
