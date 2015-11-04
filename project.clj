@@ -11,5 +11,5 @@
                  [org.clojure/clojurescript "1.7.145" :scope "provided"]
                  [com.cognitect/transit-cljs "0.8.225"]
                  [funcool/httpurr "0.1.1"]
-                 [funcool/beicon "0.1.0-SNAPSHOT"]
+                 [funcool/beicon "0.1.1"]
                  [funcool/promesa "0.5.1"]])
