@@ -101,8 +101,42 @@ with the response message or rejected with message if an `:error` message is
 returned. It there also can be rejected with an exception object if something
 foreign to transport is happens (message serialization error as example).
 
+Additionally to query, it there is also `novelty` function, that sends `:novelty`
+type frame in the same way as with `query`.
 
-== Server Push
+== User Guide
+
+=== User defined frames
+
+At this moment, postal library only implements `query` and `novelty` specialiezed
+functions for send corresponding kind of frames. Surelly, you may want to use
+own messages if the provided are not enough.
+
+For that purposes, *postal* library exposes a `send!` function that just exposes
+a low level api for define your own helpers for send frames. Let imagine you want
+to send a `:take` type message; for that let define a helper that uses `send!`
+function for send that frame:
+
+[source, clojure]
+----
+(defn take
+  "Sends a query message to a server."
+  ([client dest]
+   (take client dest nil {}))
+  ([client dest data]
+   (take client dest data {}))
+  ([client dest data opts]
+   (send! client (merge {:type :query
+                         :dest dest
+                         :data data}
+                        opts))))
+----
+
+Now, you can use the new defined `take` function in the same way as you will use
+the `query` and `novelty` functions.
+
+
+=== Server Push
 
 In some curcumstances the request/response patterns is not enough and you want
 get notifications from the backend in a server-push manener or full bi-directional
@@ -147,6 +181,9 @@ You can close a subscription just ending the message bus:
 This will close the connection and the stream, removing all existing stream
 subscriptions.
 
+
+=== Bi-directional sockets with server
+
 You also can open a bi-directional socket to the backend using `socket` function:
 
 [source, clojure]
@@ -170,25 +207,6 @@ You also can open a bi-directional socket to the backend using `socket` function
 ----
 
 And you can close the socket just ending the output bus with `s/end!` function.
-
-
-== Auth
-
-The downside of using WebSocket (like as with EventSource) is that its api
-does not allows append additional headers. The api is very limited for that. So
-you have two ways to do it:
-
-1. Using the implicit authentication using cookies; that only works if your endpoint
-is in the same domain (no cookies send in a cross domain request).
-
-2. Using a ticket based communication with single use tockens (just make a query
-request for obtain a token and later making the subscription request passing the
-token using and additional query parameter:
-
-[source, clojure]
-----
-(def sub (pc/subscribe :timeupdate nil {:params {:token my-token}}))
-----
 
 
 == FAQ
@@ -216,6 +234,33 @@ http2/spdy offers connection multiplexing allowing use one unique persistent
 connection handle all required context, completly eliminating the overhead of
 creating and destroyng connectons. With that you can make multiple and repeated
 http connections without performance issues.
+
+
+=== Is there any way to handle auth with sockets?
+
+The downside of using WebSocket (like as with EventSource) is that its api
+does not allows append additional headers. The api is very limited for that. So
+you have two ways to do it:
+
+1. Using the implicit authentication using cookies; that only works if your endpoint
+is in the same domain (no cookies send in a cross domain request).
+
+2. Using a ticket based communication with single use tockens (just make a query
+request for obtain a token and later making the subscription request passing the
+token using and additional query parameter:
+
+[source, clojure]
+----
+(def sub (pc/subscribe :timeupdate nil {:params {:token my-token}}))
+----
+
+[[postal-servers]]
+=== Is there any server supports that protocol?
+
+At this moment the unique backend/server implementation for this library is
+link:https://github.com/funcool/catacumba[catacumba]. And you can found the related
+link:https://funcool.github.io/catacumba/latest/#postal[documentation] for the
+backend handlers setup.
 
 
 == Developers Guide
