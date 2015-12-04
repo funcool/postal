@@ -4,11 +4,12 @@
             [promesa.core :as p]
             [postal.client :as pc]
             [httpurr.errors :as e]
-            [httpurr.client :as http])
-  (:import [goog.testing.net XhrIo]
-           [goog.net]))
+            [httpurr.client :as http]
+            [httpurr.client.xhr :as xhr])
+  (:import goog.testing.net.XhrIo))
 
-(set! (.-XhrIo goog.net) (.-XhrIo goog.testing.net)) ;; mock XhrIo
+;; (set! (.-XhrIo goog.net) (.-XhrIo goog.testing.net)) ;; mock XhrIo
+(set! xhr/*xhr-impl* XhrIo)
 
 (defn raw-last-request
   []
@@ -41,7 +42,6 @@
       (t/is (= (:uri req) (:url c)))
       (t/is (not (empty? (:headers req)))))))
 
-
 (t/deftest send-query-that-fails-with-timeout-spec
   (t/async done
     (let [c (pc/client "http://localhost/api")
@@ -59,6 +59,7 @@
       (p/catch r (fn [err]
                    (t/is (= err e/abort))
                    (done)))
+      (p/finally r done)
       (http/abort! r))))
 
 (t/deftest send-novelty-and-recv-response-spec
