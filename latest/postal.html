@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="author" content="Andrey Antukh, &lt;niwi@niwi.nz&gt;">
+<title>POSTAL - Protocol Spec.</title>
+<style>
+.listingblock .pygments .hll { background-color: #ffffcc }
+.listingblock .pygments  { background: #f0f0f0; }
+.listingblock .pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+.listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+.listingblock .pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+.listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.listingblock .pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+.listingblock .pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.listingblock .pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+.listingblock .pygments .tok-ge { font-style: italic } /* Generic.Emph */
+.listingblock .pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+.listingblock .pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.listingblock .pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+.listingblock .pygments .tok-go { color: #888888 } /* Generic.Output */
+.listingblock .pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.listingblock .pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+.listingblock .pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.listingblock .pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+.listingblock .pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.listingblock .pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.listingblock .pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.listingblock .pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+.listingblock .pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.listingblock .pygments .tok-kt { color: #902000 } /* Keyword.Type */
+.listingblock .pygments .tok-m { color: #40a070 } /* Literal.Number */
+.listingblock .pygments .tok-s { color: #4070a0 } /* Literal.String */
+.listingblock .pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+.listingblock .pygments .tok-nb { color: #007020 } /* Name.Builtin */
+.listingblock .pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.listingblock .pygments .tok-no { color: #60add5 } /* Name.Constant */
+.listingblock .pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.listingblock .pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.listingblock .pygments .tok-ne { color: #007020 } /* Name.Exception */
+.listingblock .pygments .tok-nf { color: #06287e } /* Name.Function */
+.listingblock .pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+.listingblock .pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.listingblock .pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+.listingblock .pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+.listingblock .pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+.listingblock .pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+.listingblock .pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+.listingblock .pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+.listingblock .pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+.listingblock .pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+.listingblock .pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+.listingblock .pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+.listingblock .pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.listingblock .pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+.listingblock .pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.listingblock .pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+.listingblock .pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.listingblock .pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+.listingblock .pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+.listingblock .pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+.listingblock .pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+.listingblock .pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+.listingblock .pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+.listingblock .pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+.listingblock .pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Liberation+Mono:400|Roboto+Slab:400,700"/>
+<link rel="stylesheet" href="https://www.niwi.nz/_assets/asciidoctor-styles/simple-red-titles/stylesheet.css"/>
+</head>
+<body class="article">
+<div id="header">
+<h1>POSTAL - Protocol Spec.</h1>
+<div class="details">
+<span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.nz&gt;</span><br>
+<span id="revdate">Version 1.0</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle"></div>
+<ul class="sectlevel1">
+<li><a href="#protocol-overview">Protocol Overview</a>
+<ul class="sectlevel2">
+<li><a href="#messages">Messages</a></li>
+</ul>
+</li>
+<li><a href="#common-messages">Common Messages</a>
+<ul class="sectlevel2">
+<li><a href="#response">:response</a></li>
+<li><a href="#error">:error</a></li>
+<li><a href="#message">:message</a></li>
+</ul>
+</li>
+<li><a href="#req-rep">REQ/REP</a>
+<ul class="sectlevel2">
+<li><a href="#query">:query</a></li>
+<li><a href="#novelty">:novelty</a></li>
+</ul>
+</li>
+<li><a href="#pub-sub">PUB/SUB</a>
+<ul class="sectlevel2">
+<li><a href="#subscribe">:subscribe</a></li>
+<li><a href="#publish">:publish</a></li>
+</ul>
+</li>
+<li><a href="#push-pull">PUSH/PULL</a>
+<ul class="sectlevel2">
+<li><a href="#put">PUT</a></li>
+<li><a href="#take">TAKE</a></li>
+</ul>
+</li>
+<li><a href="#recommendations">Recommendations</a>
+<ul class="sectlevel2">
+<li><a href="#start-using-http2-spdy">Start using http2/spdy</a></li>
+</ul>
+</li>
+<li><a href="#license">License</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="protocol-overview"><a class="link" href="#protocol-overview">Protocol Overview</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>POSTAL is a message based protocol with messages modeled as structured messages
+encoded using <code>transit+json</code> encoding. This protocol intends to be a low-level
+transport layer for build graphql like endpoints. And it is not replacement for
+websockets or other bi-directional transports/protocols.</p>
+</div>
+<div class="paragraph">
+<p>The main objective of this protocol is take aside the http rest api semantics and
+build own ones on top of http protocol.</p>
+</div>
+<div class="paragraph">
+<p>It comes with a set of predefined messages with specified semantics but that not
+limits the user to define own messages on top of that protocol.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+this document is under design and is considered in pre-alpha state.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="messages"><a class="link" href="#messages">Messages</a></h3>
+<div class="paragraph">
+<p>A <strong>postal</strong> message consists in a structured data serialized using <code>transit+json</code>.
+This is aspect of a message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:query</span>
+ <span class="tok-ss">:dest</span> <span class="tok-ss">:users</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">{</span><span class="tok-ss">:some</span> <span class="tok-ss">:data</span><span class="tok-p">}}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The previus message looks like this when it is encoded using <code>transit+json</code>
+serialization format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="json"><span class="tok-s2">&quot;[\&quot;^ \&quot;,\&quot;~:type\&quot;,\&quot;~:query\&quot;,\&quot;~:dest\&quot;,\&quot;~:users\&quot;,\&quot;~:data\&quot;,[\&quot;^ \&quot;,\&quot;~:some\&quot;,\&quot;^4\&quot;]]&quot;</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="common-messages"><a class="link" href="#common-messages">Common Messages</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="response"><a class="link" href="#response">:response</a></h3>
+<div class="paragraph">
+<p>This is a generic message that represents a server response to some kind of request.</p>
+</div>
+<div class="paragraph">
+<p>This is aspect of the <code>:response</code> message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:response</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">{</span><span class="tok-ss">:id</span> <span class="tok-mi">1</span>, <span class="tok-ss">:firstname</span> <span class="tok-s">&quot;Yennefer&quot;</span><span class="tok-p">}}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="error"><a class="link" href="#error">:error</a></h3>
+<div class="paragraph">
+<p>Is a generic message that represents a error situation. This kind of messages can be
+send by server when something goes wrong.</p>
+</div>
+<div class="paragraph">
+<p>This is aspect of the <code>:error</code> message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:error</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">{</span><span class="tok-ss">:message</span> <span class="tok-s">&quot;Does not exists&quot;</span><span class="tok-p">}}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="message"><a class="link" href="#message">:message</a></h3>
+<div class="paragraph">
+<p>This is a generic message that represents a server push notification and its
+aspect is almost identical to the <code>:response</code> but has very different semantics.</p>
+</div>
+<div class="paragraph">
+<p>This message type can be send by server in some kind of subscriptions using long
+polling http requests. The ransport layer for this kind of messages is explicitly
+undefined.</p>
+</div>
+<div class="paragraph">
+<p>This is aspect of this message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:message</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">{</span><span class="tok-ss">:id</span> <span class="tok-mi">1</span>, <span class="tok-ss">:firstname</span> <span class="tok-s">&quot;Yennefer&quot;</span><span class="tok-p">}}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="req-rep"><a class="link" href="#req-rep">REQ/REP</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section will explain messages defined for <strong>request</strong>/<strong>reply</strong> pattern.</p>
+</div>
+<div class="sect2">
+<h3 id="query"><a class="link" href="#query">:query</a></h3>
+<div class="paragraph">
+<p>This is a message that should be used for request data from specified resource. It
+is analogous to the HTTP GET.</p>
+</div>
+<div class="paragraph">
+<p>This is the aspect of the <code>:query</code> message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:query</span>
+ <span class="tok-ss">:dest</span> <span class="tok-ss">:users</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">{</span><span class="tok-ss">:id</span> <span class="tok-mi">2</span><span class="tok-p">}}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After sending a <code>:query</code> message we should expect an <code>:response</code> message to be
+sent back or <code>:error</code> if an error is ocurred. The <code>:dest</code> property is mandatory.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="novelty"><a class="link" href="#novelty">:novelty</a></h3>
+<div class="paragraph">
+<p>This is a message that serves for submit data to be processed to a specified
+resource. It is analogous to the HTTP POST/PUT.</p>
+</div>
+<div class="paragraph">
+<p>This is the aspect of the <code>novelty</code> message:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:novelty</span>
+ <span class="tok-ss">:dest</span> <span class="tok-ss">:users</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">[[</span><span class="tok-ss">:db/add</span> <span class="tok-mi">857582744</span> <span class="tok-ss">:username</span> <span class="tok-s">&quot;foobar&quot;</span><span class="tok-p">]</span>
+        <span class="tok-p">[</span><span class="tok-ss">:db/add</span> <span class="tok-mi">857582744</span> <span class="tok-ss">:password</span> <span class="tok-s">&quot;secret&quot;</span><span class="tok-p">]]}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After sending a <code>:novelty</code> message we should expect an <code>:response</code> message to be
+sent back or <code>:error</code> if an error is ocurred. The <code>:dest</code> property is mandatory.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="pub-sub"><a class="link" href="#pub-sub">PUB/SUB</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section will contain messages that are part ot the PUB/SUB scalability protocol.</p>
+</div>
+<div class="sect2">
+<h3 id="subscribe"><a class="link" href="#subscribe">:subscribe</a></h3>
+<div class="paragraph">
+<p>This is a message that&#8217;s should be used for notify the server that a client want
+subscribe to a specific topic.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:subscribe</span>
+ <span class="tok-ss">:dest</span> <span class="tok-ss">:user/notification</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">{</span><span class="tok-ss">:id</span> <span class="tok-mi">2</span><span class="tok-p">}}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The behavior of the backend and the transport layer is explicitly undefined. The
+most basic approach is just do a long-polling or using server side events.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="publish"><a class="link" href="#publish">:publish</a></h3>
+<div class="paragraph">
+<p>This is a message that should be used for publish a message in a specified topic.
+If a client is also subscribed to the topic, it will receive the published message.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:publish</span>
+ <span class="tok-ss">:dest</span> <span class="tok-ss">:user/notification</span>
+ <span class="tok-ss">:data</span> <span class="tok-p">{</span><span class="tok-ss">:foo</span> <span class="tok-s">&quot;bar&quot;</span><span class="tok-p">}}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After sending a <code>:publish</code> message we should expect an <code>:response</code> message to be
+sent back or <code>:error</code> if an error is ocurred. The <code>:dest</code> property is mandatory.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="push-pull"><a class="link" href="#push-pull">PUSH/PULL</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section will contain messages that are part ot the PUSH/PULL scalability
+protocol.</p>
+</div>
+<div class="sect2">
+<h3 id="put"><a class="link" href="#put">PUT</a></h3>
+<div class="paragraph">
+<p>TBD</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="take"><a class="link" href="#take">TAKE</a></h3>
+<div class="paragraph">
+<p>TBD</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="recommendations"><a class="link" href="#recommendations">Recommendations</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="start-using-http2-spdy"><a class="link" href="#start-using-http2-spdy">Start using http2/spdy</a></h3>
+<div class="paragraph">
+<p>As this protocol is based to work on top of HTTP, is highly recommended deploy
+your application using http2 or spdy. It is not necesary that you application
+server support it, most of the http proxies aready has support for spdy and/or
+http2 (such as nginx).</p>
+</div>
+<div class="paragraph">
+<p>http2/spdy offers connection multiplexing allowing use one unique persistent
+connection handle all required context, comptly eliminating the overhead of
+creating and destroyng connectons. With that you can make multiple and repeated
+http connections without performance issues.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="license"><a class="link" href="#license">License</a></h2>
+<div class="sectionbody">
+<div class="listingblock">
+<div class="content">
+<pre>This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2015-10-24 11:44:24 EEST
+</div>
+</div>
+</body>
+</html>

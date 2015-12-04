@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.2">
+<meta name="author" content="Andrey Antukh, &lt;niwi@niwi.nz&gt;">
+<title>postal - a postal client for clojurescript</title>
+<style>
+.listingblock .pygments .hll { background-color: #ffffcc }
+.listingblock .pygments  { background: #f0f0f0; }
+.listingblock .pygments .tok-c { color: #60a0b0; font-style: italic } /* Comment */
+.listingblock .pygments .tok-err { border: 1px solid #FF0000 } /* Error */
+.listingblock .pygments .tok-k { color: #007020; font-weight: bold } /* Keyword */
+.listingblock .pygments .tok-o { color: #666666 } /* Operator */
+.listingblock .pygments .tok-cm { color: #60a0b0; font-style: italic } /* Comment.Multiline */
+.listingblock .pygments .tok-cp { color: #007020 } /* Comment.Preproc */
+.listingblock .pygments .tok-c1 { color: #60a0b0; font-style: italic } /* Comment.Single */
+.listingblock .pygments .tok-cs { color: #60a0b0; background-color: #fff0f0 } /* Comment.Special */
+.listingblock .pygments .tok-gd { color: #A00000 } /* Generic.Deleted */
+.listingblock .pygments .tok-ge { font-style: italic } /* Generic.Emph */
+.listingblock .pygments .tok-gr { color: #FF0000 } /* Generic.Error */
+.listingblock .pygments .tok-gh { color: #000080; font-weight: bold } /* Generic.Heading */
+.listingblock .pygments .tok-gi { color: #00A000 } /* Generic.Inserted */
+.listingblock .pygments .tok-go { color: #888888 } /* Generic.Output */
+.listingblock .pygments .tok-gp { color: #c65d09; font-weight: bold } /* Generic.Prompt */
+.listingblock .pygments .tok-gs { font-weight: bold } /* Generic.Strong */
+.listingblock .pygments .tok-gu { color: #800080; font-weight: bold } /* Generic.Subheading */
+.listingblock .pygments .tok-gt { color: #0044DD } /* Generic.Traceback */
+.listingblock .pygments .tok-kc { color: #007020; font-weight: bold } /* Keyword.Constant */
+.listingblock .pygments .tok-kd { color: #007020; font-weight: bold } /* Keyword.Declaration */
+.listingblock .pygments .tok-kn { color: #007020; font-weight: bold } /* Keyword.Namespace */
+.listingblock .pygments .tok-kp { color: #007020 } /* Keyword.Pseudo */
+.listingblock .pygments .tok-kr { color: #007020; font-weight: bold } /* Keyword.Reserved */
+.listingblock .pygments .tok-kt { color: #902000 } /* Keyword.Type */
+.listingblock .pygments .tok-m { color: #40a070 } /* Literal.Number */
+.listingblock .pygments .tok-s { color: #4070a0 } /* Literal.String */
+.listingblock .pygments .tok-na { color: #4070a0 } /* Name.Attribute */
+.listingblock .pygments .tok-nb { color: #007020 } /* Name.Builtin */
+.listingblock .pygments .tok-nc { color: #0e84b5; font-weight: bold } /* Name.Class */
+.listingblock .pygments .tok-no { color: #60add5 } /* Name.Constant */
+.listingblock .pygments .tok-nd { color: #555555; font-weight: bold } /* Name.Decorator */
+.listingblock .pygments .tok-ni { color: #d55537; font-weight: bold } /* Name.Entity */
+.listingblock .pygments .tok-ne { color: #007020 } /* Name.Exception */
+.listingblock .pygments .tok-nf { color: #06287e } /* Name.Function */
+.listingblock .pygments .tok-nl { color: #002070; font-weight: bold } /* Name.Label */
+.listingblock .pygments .tok-nn { color: #0e84b5; font-weight: bold } /* Name.Namespace */
+.listingblock .pygments .tok-nt { color: #062873; font-weight: bold } /* Name.Tag */
+.listingblock .pygments .tok-nv { color: #bb60d5 } /* Name.Variable */
+.listingblock .pygments .tok-ow { color: #007020; font-weight: bold } /* Operator.Word */
+.listingblock .pygments .tok-w { color: #bbbbbb } /* Text.Whitespace */
+.listingblock .pygments .tok-mb { color: #40a070 } /* Literal.Number.Bin */
+.listingblock .pygments .tok-mf { color: #40a070 } /* Literal.Number.Float */
+.listingblock .pygments .tok-mh { color: #40a070 } /* Literal.Number.Hex */
+.listingblock .pygments .tok-mi { color: #40a070 } /* Literal.Number.Integer */
+.listingblock .pygments .tok-mo { color: #40a070 } /* Literal.Number.Oct */
+.listingblock .pygments .tok-sb { color: #4070a0 } /* Literal.String.Backtick */
+.listingblock .pygments .tok-sc { color: #4070a0 } /* Literal.String.Char */
+.listingblock .pygments .tok-sd { color: #4070a0; font-style: italic } /* Literal.String.Doc */
+.listingblock .pygments .tok-s2 { color: #4070a0 } /* Literal.String.Double */
+.listingblock .pygments .tok-se { color: #4070a0; font-weight: bold } /* Literal.String.Escape */
+.listingblock .pygments .tok-sh { color: #4070a0 } /* Literal.String.Heredoc */
+.listingblock .pygments .tok-si { color: #70a0d0; font-style: italic } /* Literal.String.Interpol */
+.listingblock .pygments .tok-sx { color: #c65d09 } /* Literal.String.Other */
+.listingblock .pygments .tok-sr { color: #235388 } /* Literal.String.Regex */
+.listingblock .pygments .tok-s1 { color: #4070a0 } /* Literal.String.Single */
+.listingblock .pygments .tok-ss { color: #517918 } /* Literal.String.Symbol */
+.listingblock .pygments .tok-bp { color: #007020 } /* Name.Builtin.Pseudo */
+.listingblock .pygments .tok-vc { color: #bb60d5 } /* Name.Variable.Class */
+.listingblock .pygments .tok-vg { color: #bb60d5 } /* Name.Variable.Global */
+.listingblock .pygments .tok-vi { color: #bb60d5 } /* Name.Variable.Instance */
+.listingblock .pygments .tok-il { color: #40a070 } /* Literal.Number.Integer.Long */
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic|Liberation+Mono:400|Roboto+Slab:400,700"/>
+<link rel="stylesheet" href="https://www.niwi.nz/_assets/asciidoctor-styles/simple-red-titles/stylesheet.css"/>
+</head>
+<body class="article toc2 toc-left">
+<div id="header">
+<h1>postal - a postal client for clojurescript</h1>
+<div class="details">
+<span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.nz&gt;</span><br>
+<span id="revdate">v0.2.0</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#introduction">Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#rationale">Rationale</a></li>
+<li><a href="#project-maturity">Project Maturity</a></li>
+<li><a href="#install">Install</a></li>
+</ul>
+</li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#user-guide">User Guide</a>
+<ul class="sectlevel2">
+<li><a href="#user-defined-frames">User defined frames</a></li>
+<li><a href="#server-push">Server Push</a></li>
+<li><a href="#bi-directional-sockets-with-server">Bi-directional sockets with server</a></li>
+</ul>
+</li>
+<li><a href="#faq">FAQ</a>
+<ul class="sectlevel2">
+<li><a href="#is-it-a-replacement-for-websockets">Is it a replacement for WebSockets?</a></li>
+<li><a href="#should-i-use-http2-spdy">Should I use HTTP2/SPDY?</a></li>
+<li><a href="#is-there-any-way-to-handle-auth-with-sockets">Is there any way to handle auth with sockets?</a></li>
+<li><a href="#postal-servers">Is there any server supports that protocol?</a></li>
+</ul>
+</li>
+<li><a href="#developers-guide">Developers Guide</a>
+<ul class="sectlevel2">
+<li><a href="#philosophy">Philosophy</a></li>
+<li><a href="#contributing">Contributing</a></li>
+<li><a href="#source-code">Source Code</a></li>
+<li><a href="#run-tests">Run tests</a></li>
+<li><a href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="introduction"><a class="link" href="#introduction">Introduction</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><em>postal</em> is a simple <strong>postal</strong> protocol client for <em>ClojureScript</em>.</p>
+</div>
+<div class="sect2">
+<h3 id="rationale"><a class="link" href="#rationale">Rationale</a></h3>
+<div class="paragraph">
+<p>The tipical web application usually follows the api REST architecture, but the main
+problem of that is that is bound directly to the HTTP semantics that are not
+always coherent or not always clear how to use.</p>
+</div>
+<div class="paragraph">
+<p>This is a client library that implements the <a href="https://funcool.github.io/catacumba/latest/postal.html">postal protocol</a>.
+And allows consume APIs using rich and user defined messages on top of http.</p>
+</div>
+<div class="paragraph">
+<p>The general idea behind the protocol and this library is borrowed from
+<a href="https://facebook.github.io/relay/">Facebook Relay</a> and
+<a href="http://netflix.github.io/falcor/">Netflix&#8217;s Falcor</a>.
+The main differents with them is that this library only represents the transport
+layer, so it&#8217;s is nonobstructive and not copupled with concrete framework.</p>
+</div>
+<div class="paragraph">
+<p>This means that you can use it with any <a href="#postal-servers"><strong>postal</strong> protocol
+compliant servers</a>. One of the great examples where this library fits in a
+perfection is a transport layer for
+<a href="https://github.com/omcljs/om/wiki/Quick-Start-(om.next)">Om.Next</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="project-maturity"><a class="link" href="#project-maturity">Project Maturity</a></h3>
+<div class="paragraph">
+<p>Since <em>postal</em> is a young project there can be some API breakage.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install"><a class="link" href="#install">Install</a></h3>
+<div class="paragraph">
+<p>The simplest way to use <em>postal</em> in a clojure project, is by including it in the
+dependency vector on your <strong><em>project.clj</em></strong> file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/postal</span> <span class="tok-s">&quot;0.2.0&quot;</span><span class="tok-p">]</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="getting-started"><a class="link" href="#getting-started">Getting Started</a></h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <strong>postal</strong> interface is really simple. The first step for use it, just define
+a client instance:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">postal.client</span> <span class="tok-ss">:as</span> <span class="tok-nv">pc</span><span class="tok-p">])</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">c</span> <span class="tok-p">(</span><span class="tok-nf">pc/client</span> <span class="tok-s">&quot;http://yourser.ver/end/point&quot;</span><span class="tok-p">))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The client is stateless, so you can define it globally without any problem. It only
+stores the initial configuration.</p>
+</div>
+<div class="paragraph">
+<p>By default it uses "PUT" http connection for send messages to backend. Is should be
+also a default value in the backend but you can change it using the second optional
+parameter to the client function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">c</span> <span class="tok-p">(</span><span class="tok-nf">pc/client</span> <span class="tok-nv">uri</span> <span class="tok-p">{</span><span class="tok-ss">:method</span> <span class="tok-ss">:get</span><span class="tok-p">}))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The "GET" method allows send the messages using http GET request using query string
+parameter. This in some circumstances enable more facilities that it can be used
+in cross domain without specially setup CORS.</p>
+</div>
+<div class="paragraph">
+<p>Additionally, you can setup initial http headers to use, using the <code>:headers</code>
+option. And them can be updated or reset after client definition using
+<code>postal.client/update-headers!</code> or <code>postal.client/reset-headers!</code>.</p>
+</div>
+<div class="paragraph">
+<p>And finally, just use it using the public api. It there an example performing a
+<code>:query</code> request:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">promesa.core</span> <span class="tok-ss">:as</span> <span class="tok-nv">p</span><span class="tok-p">])</span>
+
+<span class="tok-p">(</span><span class="tok-nf">p/then</span> <span class="tok-p">(</span><span class="tok-nf">pc/query</span> <span class="tok-nv">c</span> <span class="tok-ss">:users</span> <span class="tok-p">{</span><span class="tok-ss">:id</span> <span class="tok-mi">1</span><span class="tok-p">})</span>
+        <span class="tok-p">(</span><span class="tok-k">fn </span><span class="tok-p">[{</span><span class="tok-ss">:keys</span> <span class="tok-p">[</span><span class="tok-nv">data</span><span class="tok-p">]</span> <span class="tok-ss">:as</span> <span class="tok-nv">msg</span><span class="tok-p">}]</span>
+          <span class="tok-p">(</span><span class="tok-nb">println </span><span class="tok-s">&quot;User: &quot;</span> <span class="tok-nv">data</span><span class="tok-p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can notice that <code>query</code> function just return a promise that will be resolved
+with the response message or rejected with message if an <code>:error</code> message is
+returned. It there also can be rejected with an exception object if something
+foreign to transport is happens (message serialization error as example).</p>
+</div>
+<div class="paragraph">
+<p>Additionally to query, it there is also <code>novelty</code> function, that sends <code>:novelty</code>
+type frame in the same way as with <code>query</code>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="user-guide"><a class="link" href="#user-guide">User Guide</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="user-defined-frames"><a class="link" href="#user-defined-frames">User defined frames</a></h3>
+<div class="paragraph">
+<p>At this moment, postal library only implements <code>query</code> and <code>novelty</code> specialiezed
+functions for send corresponding kind of frames. Surelly, you may want to use
+own messages if the provided are not enough.</p>
+</div>
+<div class="paragraph">
+<p>For that purposes, <strong>postal</strong> library exposes a <code>send!</code> function that just exposes
+a low level api for define your own helpers for send frames. Let imagine you want
+to send a <code>:take</code> type message; for that let define a helper that uses <code>send!</code>
+function for send that frame:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-kd">defn </span><span class="tok-nv">take</span>
+  <span class="tok-s">&quot;Sends a query message to a server.&quot;</span>
+  <span class="tok-p">([</span><span class="tok-nv">client</span> <span class="tok-nv">dest</span><span class="tok-p">]</span>
+   <span class="tok-p">(</span><span class="tok-nb">take </span><span class="tok-nv">client</span> <span class="tok-nv">dest</span> <span class="tok-nv">nil</span> <span class="tok-p">{}))</span>
+  <span class="tok-p">([</span><span class="tok-nv">client</span> <span class="tok-nv">dest</span> <span class="tok-nv">data</span><span class="tok-p">]</span>
+   <span class="tok-p">(</span><span class="tok-nb">take </span><span class="tok-nv">client</span> <span class="tok-nv">dest</span> <span class="tok-nv">data</span> <span class="tok-p">{}))</span>
+  <span class="tok-p">([</span><span class="tok-nv">client</span> <span class="tok-nv">dest</span> <span class="tok-nv">data</span> <span class="tok-nv">opts</span><span class="tok-p">]</span>
+   <span class="tok-p">(</span><span class="tok-nf">send!</span> <span class="tok-nv">client</span> <span class="tok-p">(</span><span class="tok-nb">merge </span><span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:query</span>
+                         <span class="tok-ss">:dest</span> <span class="tok-nv">dest</span>
+                         <span class="tok-ss">:data</span> <span class="tok-nv">data</span><span class="tok-p">}</span>
+                        <span class="tok-nv">opts</span><span class="tok-p">))))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, you can use the new defined <code>take</code> function in the same way as you will use
+the <code>query</code> and <code>novelty</code> functions.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="server-push"><a class="link" href="#server-push">Server Push</a></h3>
+<div class="paragraph">
+<p>In some curcumstances the request/response patterns is not enough and you want
+get notifications from the backend in a server-push manener or full bi-directional
+communication with the backend.</p>
+</div>
+<div class="paragraph">
+<p>For solve that, WebSocket approach is chosen because is more widelly supported by
+the browsers that Server-Sent-Events and supports bi-drectional communication with
+the server.</p>
+</div>
+<div class="paragraph">
+<p>The difference with plain websockets, you will be able send more rich messages
+because behind the scenes messages are serialized using transit serialization
+format and also you should not care about socket reconnection because it is handled
+automatically.</p>
+</div>
+<div class="paragraph">
+<p>It there two ways to connect to the server, in unidirectional or bidirectional way.
+The unidirectional approach serves just for cases where you only need server push,
+and the bi-directional in case you want also send messages to the server using the
+web socket connection. This library exposes a simple api for both approaches using
+<a href="https://github.com/funcool/beicon">beicon library</a> (wrapper over rxjs).</p>
+</div>
+<div class="paragraph">
+<p>Let see how it can be used:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">beicon.core</span> <span class="tok-ss">:as</span> <span class="tok-nv">s</span><span class="tok-p">])</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">c</span> <span class="tok-p">(</span><span class="tok-nf">pc/client</span> <span class="tok-s">&quot;http://yourser.ver/api&quot;</span><span class="tok-p">))</span>
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">bus</span> <span class="tok-p">(</span><span class="tok-nf">pc/subscribe</span> <span class="tok-nv">c</span> <span class="tok-ss">:timeupdate</span> <span class="tok-p">{</span><span class="tok-ss">:some</span> <span class="tok-s">&quot;additional data&quot;</span><span class="tok-p">}))</span>
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">stream</span> <span class="tok-p">(</span><span class="tok-nf">s/throttle</span> <span class="tok-nv">bus</span> <span class="tok-mi">1000</span><span class="tok-p">)))</span>
+
+<span class="tok-p">(</span><span class="tok-nf">s/on-value</span> <span class="tok-nv">stream</span> <span class="tok-p">(</span><span class="tok-k">fn </span><span class="tok-p">[</span><span class="tok-nv">message</span><span class="tok-p">]</span>
+                     <span class="tok-p">(</span><span class="tok-nb">println </span><span class="tok-s">&quot;Received: &quot;</span> <span class="tok-nv">message</span><span class="tok-p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can close a subscription just ending the message bus:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">s/end!</span> <span class="tok-nv">bus</span><span class="tok-p">)</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will close the connection and the stream, removing all existing stream
+subscriptions.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="bi-directional-sockets-with-server"><a class="link" href="#bi-directional-sockets-with-server">Bi-directional sockets with server</a></h3>
+<div class="paragraph">
+<p>You also can open a bi-directional socket to the backend using <code>socket</code> function:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-nf">require</span> <span class="tok-o">&#39;</span><span class="tok-p">[</span><span class="tok-nv">beicon.core</span> <span class="tok-ss">:as</span> <span class="tok-nv">s</span><span class="tok-p">])</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">c</span> <span class="tok-p">(</span><span class="tok-nf">pc/client</span> <span class="tok-s">&quot;http://yourser.ver/api&quot;</span><span class="tok-p">))</span>
+
+<span class="tok-p">(</span><span class="tok-k">let </span><span class="tok-p">[[</span><span class="tok-nv">instream</span> <span class="tok-nv">outbus</span><span class="tok-p">]</span> <span class="tok-p">(</span><span class="tok-nf">pc/socket</span> <span class="tok-nv">c</span> <span class="tok-ss">:timeupdate</span><span class="tok-p">)]</span>
+  <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">in</span> <span class="tok-nv">instream</span><span class="tok-p">)</span>
+  <span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">out</span> <span class="tok-nv">outbus</span><span class="tok-p">))</span>
+
+<span class="tok-c1">;; Send messages to the backend</span>
+<span class="tok-c1">;; Literally can be any kind of messages that</span>
+<span class="tok-c1">;; can be encoded using transit-clj.</span>
+<span class="tok-p">(</span><span class="tok-nf">s/push!</span> <span class="tok-nv">out</span> <span class="tok-p">{</span><span class="tok-ss">:type</span> <span class="tok-ss">:message</span> <span class="tok-ss">:data</span> <span class="tok-s">&quot;Hello&quot;</span><span class="tok-p">})</span>
+
+<span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">stream</span> <span class="tok-p">(</span><span class="tok-nf">s/throttle</span> <span class="tok-nv">in</span> <span class="tok-mi">1000</span><span class="tok-p">)))</span>
+<span class="tok-p">(</span><span class="tok-nf">s/on-value</span> <span class="tok-nv">stream</span> <span class="tok-p">(</span><span class="tok-k">fn </span><span class="tok-p">[</span><span class="tok-nv">message</span><span class="tok-p">]</span>
+                     <span class="tok-p">(</span><span class="tok-nb">println </span><span class="tok-s">&quot;Received: &quot;</span> <span class="tok-nv">message</span><span class="tok-p">)))</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And you can close the socket just ending the output bus with <code>s/end!</code> function.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="faq"><a class="link" href="#faq">FAQ</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="is-it-a-replacement-for-websockets"><a class="link" href="#is-it-a-replacement-for-websockets">Is it a replacement for WebSockets?</a></h3>
+<div class="paragraph">
+<p>In general NO. This library/protocol does not intends to replace any existing
+bi-directional protocols/messaging-systems. In fact, it lives together with
+websockets.</p>
+</div>
+<div class="paragraph">
+<p>With the upcoming http2 and already existing spdy, most of the performance
+problems of the http1.x are solved. So, the majority of the standard use of
+websockets can be easily soved using http (http2/spdy).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="should-i-use-http2-spdy"><a class="link" href="#should-i-use-http2-spdy">Should I use HTTP2/SPDY?</a></h3>
+<div class="paragraph">
+<p>No, but is highly recommeded.</p>
+</div>
+<div class="paragraph">
+<p>At this moment is not necesary that you server to have the http2/spdy support,
+is more that enough putting your application behind an http proxy like nginx that
+already supports SPDY and http2 support is upcoming.</p>
+</div>
+<div class="paragraph">
+<p>http2/spdy offers connection multiplexing allowing use one unique persistent
+connection handle all required context, completly eliminating the overhead of
+creating and destroyng connectons. With that you can make multiple and repeated
+http connections without performance issues.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="is-there-any-way-to-handle-auth-with-sockets"><a class="link" href="#is-there-any-way-to-handle-auth-with-sockets">Is there any way to handle auth with sockets?</a></h3>
+<div class="paragraph">
+<p>The downside of using WebSocket (like as with EventSource) is that its api
+does not allows append additional headers. The api is very limited for that. So
+you have two ways to do it:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Using the implicit authentication using cookies; that only works if your endpoint
+is in the same domain (no cookies send in a cross domain request).</p>
+</li>
+<li>
+<p>Using a ticket based communication with single use tockens (just make a query
+request for obtain a token and later making the subscription request passing the
+token using and additional query parameter:</p>
+</li>
+</ol>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">(</span><span class="tok-k">def </span><span class="tok-nv">sub</span> <span class="tok-p">(</span><span class="tok-nf">pc/subscribe</span> <span class="tok-ss">:timeupdate</span> <span class="tok-nv">nil</span> <span class="tok-p">{</span><span class="tok-ss">:params</span> <span class="tok-p">{</span><span class="tok-ss">:token</span> <span class="tok-nv">my-token</span><span class="tok-p">}}))</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="postal-servers"><a class="link" href="#postal-servers">Is there any server supports that protocol?</a></h3>
+<div class="paragraph">
+<p>At this moment the unique backend/server implementation for this library is
+<a href="https://github.com/funcool/catacumba">catacumba</a>. And you can found the related
+<a href="https://funcool.github.io/catacumba/latest/#postal">documentation</a> for the
+backend handlers setup.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="developers-guide"><a class="link" href="#developers-guide">Developers Guide</a></h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="philosophy"><a class="link" href="#philosophy">Philosophy</a></h3>
+<div class="paragraph">
+<p>Five most important rules:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Beautiful is better than ugly.</p>
+</li>
+<li>
+<p>Explicit is better than implicit.</p>
+</li>
+<li>
+<p>Simple is better than complex.</p>
+</li>
+<li>
+<p>Complex is better than complicated.</p>
+</li>
+<li>
+<p>Readability counts.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All contributions to <em>postal</em> should keep these important rules in mind.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="contributing"><a class="link" href="#contributing">Contributing</a></h3>
+<div class="paragraph">
+<p>Unlike Clojure and other Clojure contributed libraries <em>postal</em> does not have many
+restrictions for contributions. Just open an issue or pull request.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="source-code"><a class="link" href="#source-code">Source Code</a></h3>
+<div class="paragraph">
+<p><em>postal</em> is open source and can be found on
+<a href="https://github.com/funcool/catacumba">github</a>.</p>
+</div>
+<div class="paragraph">
+<p>You can clone the public repository with this command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">git clone https://github.com/funcool/postal</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="run-tests"><a class="link" href="#run-tests">Run tests</a></h3>
+<div class="paragraph">
+<p>For running tests just execute this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code data-lang="text">./scripts/build
+node ./out/tests.js</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="license"><a class="link" href="#license">License</a></h3>
+<div class="paragraph">
+<p><em>postal</em> is under public domain:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>This is free and unencumbered software released into the public domain.
+
+Anyone is free to copy, modify, publish, use, compile, sell, or
+distribute this software, either in source code form or as a compiled
+binary, for any purpose, commercial or non-commercial, and by any
+means.
+
+In jurisdictions that recognize copyright laws, the author or authors
+of this software dedicate any and all copyright interest in the
+software to the public domain. We make this dedication for the benefit
+of the public at large and to the detriment of our heirs and
+successors. We intend this dedication to be an overt act of
+relinquishment in perpetuity of all present and future rights to this
+software under copyright law.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
+For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2015-11-04 21:35:48 EET
+</div>
+</div>
+</body>
+</html>
