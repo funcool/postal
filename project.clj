@@ -1,4 +1,4 @@
-(defproject funcool/postal "0.2.0"
+(defproject funcool/postal "0.3.0"
   :description "postal client for clojurescript"
   :url "http://github.com/funcool/postal"
   :license {:name "Public Domain"
