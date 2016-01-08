@@ -1,6 +1,6 @@
 = postal - a postal client for clojurescript
 Andrey Antukh, <niwi@niwi.nz>
-v0.2.0
+v0.3.0
 :toc: left
 :!numbered:
 :idseparator: -
@@ -48,7 +48,7 @@ dependency vector on your *_project.clj_* file:
 
 [source,clojure]
 ----
-[funcool/postal "0.2.0"]
+[funcool/postal "0.3.0"]
 ----
 
 
