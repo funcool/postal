@@ -1,5 +1,11 @@
 # Changelog #
 
+## Version 0.4.0 ##
+
+Date: 2016-01-23
+
+- Upgrade dependencies.
+
 
 ## Version 0.3.0 ##
 
