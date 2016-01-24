@@ -258,7 +258,7 @@ token using and additional query parameter:
 === Is there any server supports that protocol?
 
 At this moment the unique backend/server implementation for this library is
-link:https://github.com/funcool/catacumba[catacumba]. And you can found the related
+link:https://github.com/funcool/catacumba[catacumba]. And you can find the related
 link:https://funcool.github.io/catacumba/latest/#postal[documentation] for the
 backend handlers setup.
 
