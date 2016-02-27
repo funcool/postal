@@ -1,6 +1,5 @@
 (ns postal.client-tests
   (:require [cljs.test :as t]
-            [cats.core :as m]
             [promesa.core :as p]
             [postal.client :as pc]
             [httpurr.errors :as e]

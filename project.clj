@@ -1,8 +1,7 @@
-(defproject funcool/postal "0.4.0"
+(defproject funcool/postal "0.5.0"
   :description "postal client for clojurescript"
   :url "http://github.com/funcool/postal"
-  :license {:name "Public Domain"
-            :url "http://unlicense.org/"}
+  :license {:name "Public Domain" :url "http://unlicense.org/"}
   :source-paths ["src"]
   :jar-exclusions [#"\.swp|\.swo|user.clj"]
   :javac-options ["-target" "1.8" "-source" "1.8" "-Xlint:-options"]
