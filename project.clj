@@ -10,7 +10,6 @@
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
                  [org.clojure/clojurescript "1.7.228" :scope "provided"]
                  [com.cognitect/transit-cljs "0.8.237"]
-                 [funcool/cats "1.2.1"]
-                 [funcool/httpurr "0.3.0"]
-                 [funcool/beicon "0.6.0"]
-                 [funcool/promesa "0.7.0"]])
+                 [funcool/httpurr "0.4.0"]
+                 [funcool/beicon "0.6.1"]
+                 [funcool/promesa "0.8.1"]])
