@@ -48,7 +48,7 @@ dependency vector on your *_project.clj_* file:
 
 [source,clojure]
 ----
-[funcool/postal "0.5.0"]
+[funcool/postal "0.6.0"]
 ----
 
 

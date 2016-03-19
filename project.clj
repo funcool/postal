@@ -4,7 +4,6 @@
   :license {:name "Public Domain" :url "http://unlicense.org/"}
   :source-paths ["src"]
   :jar-exclusions [#"\.swp|\.swo|user.clj"]
-  :javac-options ["-target" "1.8" "-source" "1.8" "-Xlint:-options"]
   :plugins [[lein-ancient "0.6.7"]]
   :dependencies [[org.clojure/clojure "1.8.0" :scope "provided"]
                  [org.clojure/clojurescript "1.8.34" :scope "provided"]
