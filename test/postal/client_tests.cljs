@@ -2,7 +2,6 @@
   (:require [cljs.test :as t]
             [promesa.core :as p]
             [postal.client :as pc]
-            [httpurr.errors :as e]
             [httpurr.client :as http]
             [httpurr.client.xhr :as xhr])
   (:import goog.testing.net.XhrIo))
@@ -46,7 +45,7 @@
     (let [c (pc/client "http://localhost/api")
           r (pc/query c :users {:id 1})]
       (p/catch r (fn [err]
-                   (t/is (= err e/timeout))
+                   (t/is (= (:type (ex-data err)) :timeout))
                    (done))))
     (let [xhr (raw-last-request)]
       (.simulateTimeout xhr))))
@@ -56,7 +55,7 @@
     (let [c (pc/client "http://localhost/api")
           r (pc/query c :users {:id 1})]
       (p/catch r (fn [err]
-                   (t/is (= err e/abort))
+                   (t/is (= (:type (ex-data err)) :abort))
                    (done)))
       (p/finally r done)
       (http/abort! r))))
