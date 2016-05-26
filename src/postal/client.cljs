@@ -103,7 +103,8 @@
   [client {:keys [type dest data headers] :as opts}]
   {:pre [(or (map? data)
              (nil? data))
-         (keyword? dest)
+         (or (keyword? dest)
+             (string? dest))
          (client? client)]}
   (let [data (encode {:data data :dest dest :type type})
         req (prepare-request client data)]
