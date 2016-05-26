@@ -1,5 +1,13 @@
 # Changelog #
 
+## Version 0.7.0 ##
+
+Date: 2016-04-26
+
+- Update dependencies
+- Allow strings as dest.
+
+
 ## Version 0.6.0 ##
 
 Date: 2016-03-19
