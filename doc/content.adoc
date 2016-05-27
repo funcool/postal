@@ -17,33 +17,32 @@ _postal_ is a simple *postal* protocol client for _ClojureScript_.
 
 === Rationale
 
-The tipical web application usually follows the api REST architecture, but the main
+The typical web application usually follows the API REST architecture, but the main
 problem of that is that is bound directly to the HTTP semantics that are not
 always coherent or not always clear how to use.
 
-This is a client library that implements the link:https://funcool.github.io/catacumba/latest/postal.html[postal protocol].
-And allows consume APIs using rich and user defined messages on top of http.
+Postal is a client library that implements the link:https://funcool.github.io/catacumba/latest/postal.html[postal protocol].
+And allows consume APIs using rich and user defined messages on top of HTTP.
 
-The general idea behind the protocol and this library is borrowed from
+The general idea behind the protocol and this library was inspired by
 link:https://facebook.github.io/relay/[Facebook Relay] and
 link:http://netflix.github.io/falcor/[Netflix's Falcor].
 The main differents with them is that this library only represents the transport
-layer, so it's is nonobstructive and not copupled with concrete framework.
+layer, so it's is nonobstructive and not coupled with the concrete framework.
 
-This means that you can use it with any <<postal-servers, *postal* protocol
-compliant servers>>. One of the great examples where this library fits in a
-perfection is a transport layer for
+Postal is intended for use with any <<postal-servers, *postal* protocol
+compliant servers>>. An exceptional example of where this library fits in is a transport layer for
 link:https://github.com/omcljs/om/wiki/Quick-Start-(om.next)[Om.Next].
 
 
 === Project Maturity
 
-Since _postal_ is a young project there can be some API breakage.
+Since _postal_ is a young project, there can be some API breakage.
 
 
 === Install
 
-The simplest way to use _postal_ in a clojure project, is by including it in the
+The simplest way to use _postal_ in a Clojure project is by including it in the
 dependency vector on your *_project.clj_* file:
 
 [source,clojure]
@@ -54,7 +53,7 @@ dependency vector on your *_project.clj_* file:
 
 == Getting Started
 
-The *postal* interface is really simple. The first step for use it, just define
+The *postal* interface is simple. The first step for use it, just define
 a client instance:
 
 [source, clojure]
@@ -64,27 +63,26 @@ a client instance:
 (def c (pc/client "http://yourser.ver/end/point"))
 ----
 
-The client is stateless, so you can define it globally without any problem. It only
+The client is stateless so that you can define it globally without any problem. It only
 stores the initial configuration.
 
-By default it uses "PUT" http connection for send messages to backend. Is should be
-also a default value in the backend but you can change it using the second optional
-parameter to the client function:
+By default, it uses "PUT" HTTP connection to send messages to backend. "PUT" is a good default value in the backend but if you feel otherwise you can change it using the second optional
+the parameter to the client function:
 
 [source, clojure]
 ----
 (def c (pc/client uri {:method :get}))
 ----
 
-The "GET" method allows send the messages using http GET request using query string
-parameter. This in some circumstances enable more facilities that it can be used
-in cross domain without specially setup CORS.
+Using the "GET" method allows sending the messages using HTTP GET request using as well as a query string
+parameter. In some circumstances using GET (as opposed to PUT) is beneficial; for example,
+when making cross domain without specially setup CORS.
 
-Additionally, you can setup initial http headers to use, using the `:headers`
-option. And them can be updated or reset after client definition using
+Additionally, you can setup initial HTTP headers to use, using the `:headers`
+option. And they can be updated or reset after client definition using
 `postal.client/update-headers!` or `postal.client/reset-headers!`.
 
-And finally, just use it using the public api. It there an example performing a
+And finally, just use it using the public API. It there an example performing a
 `:query` request:
 
 [source, clojure]
@@ -96,25 +94,25 @@ And finally, just use it using the public api. It there an example performing a
           (println "User: " data)))
 ----
 
-You can notice that `query` function just return a promise that will be resolved
-with the response message or rejected with message if an `:error` message is
-returned. It there also can be rejected with an exception object if something
-foreign to transport is happens (message serialization error as example).
+Notice that `query` function returns a promise that will be resolved
+with the response message or rejected with a message if an `:error` message is
+returned. The promise may also be rejected with an exception object if something
+foreign to transport happens (message serialization error as an example).
 
-Additionally to query, it there is also `novelty` function, that sends `:novelty`
+Additionally to query, there is also `novelty` function, that sends `:novelty`
 type frame in the same way as with `query`.
 
 == User Guide
 
 === User defined frames
 
-At this moment, postal library only implements `query` and `novelty` specialiezed
-functions for send corresponding kind of frames. Surelly, you may want to use
+At this moment, the postal library only implements `query` and `novelty` specialized
+functions for send corresponding kind of frames. Surely, you may want to use
 own messages if the provided are not enough.
 
-For that purposes, *postal* library exposes a `send!` function that just exposes
-a low level api for define your own helpers for send frames. Let imagine you want
-to send a `:take` type message; for that let define a helper that uses `send!`
+For that purpose, *postal* library exposes a `send!` function that just exposes
+as a low level api to define your own helpers for send frames. Let us imagine you want
+to send a `:take` type message; to do so let's define a helper that uses `send!`
 function for send that frame:
 
 [source, clojure]
@@ -138,23 +136,20 @@ the `query` and `novelty` functions.
 
 === Server Push
 
-In some curcumstances the request/response patterns is not enough and you want
-get notifications from the backend in a server-push manener or full bi-directional
-communication with the backend.
+In some circumstances, the request/response patterns are not enough. Maybe you want to
+get notifications from the backend in a server-push manner or full bi-directional
+communication with the backend (as opposed to having the client pull as all of the examples previously demonstrate).
 
-For solve that, WebSocket approach is chosen because is more widelly supported by
-the browsers that Server-Sent-Events and supports bi-drectional communication with
+For this, a WebSocket approach is chosen because is more widely supported by browsers then Server-Sent-Events and supports bi-directional communication with
 the server.
 
-The difference with plain websockets, you will be able send more rich messages
-because behind the scenes messages are serialized using transit serialization
-format and also you should not care about socket reconnection because it is handled
-automatically.
+The difference from plain WebSockets, you will be able to send more rich messages
+because behind the scenes, messages are serialized using transit serialization
+format. Additionally, handling socket reconnection 
+automatic (via postal).
 
-It there two ways to connect to the server, in unidirectional or bidirectional way.
-The unidirectional approach serves just for cases where you only need server push,
-and the bi-directional in case you want also send messages to the server using the
-web socket connection. This library exposes a simple api for both approaches using
+There two ways to open a WebSocket to the server, in a unidirectional or a bidirectional way.
+The unidirectional approach serves just for cases where you only need server push. The bi-directional option allows you to also send messages to the server using the web socket connection. This library exposes a simple API for both approaches using
 link:https://github.com/funcool/beicon[beicon library] (wrapper over rxjs).
 
 Let see how it can be used:
@@ -178,7 +173,7 @@ You can close a subscription just ending the message bus:
 (s/end! bus)
 ----
 
-This will close the connection and the stream, removing all existing stream
+calling `beicon.core/end!`  will close the connection and the stream, removing all existing stream
 subscriptions.
 
 
@@ -213,40 +208,40 @@ And you can close the socket just ending the output bus with `s/end!` function.
 
 === Is it a replacement for WebSockets?
 
-In general NO. This library/protocol does not intends to replace any existing
+In general NO. This library/protocol does not intend to replace any existing
 bi-directional protocols/messaging-systems. In fact, it lives together with
-websockets.
+WebSockets.
 
 With the upcoming http2 and already existing spdy, most of the performance
 problems of the http1.x are solved. So, the majority of the standard use of
-websockets can be easily soved using http (http2/spdy).
+WebSockets can be easily solved using HTTP (http2/spdy).
 
 
 === Should I use HTTP2/SPDY?
 
-No, but is highly recommeded.
+No, but is highly recommended.
 
-At this moment is not necesary that you server to have the http2/spdy support,
-is more that enough putting your application behind an http proxy like nginx that
-already supports SPDY and http2 support is upcoming.
+At this moment, it is not necessary that your server has http2/spdy support.
+Putting your application behind an HTTP proxy like nginx that
+already supports SPDY and http2 support is an option.
 
 http2/spdy offers connection multiplexing allowing use one unique persistent
-connection handle all required context, completly eliminating the overhead of
-creating and destroyng connectons. With that you can make multiple and repeated
-http connections without performance issues.
+connection handle all required context, eliminating the overhead of
+creating and destroying connections. With that, you can make multiple and repeated
+HTTP connections without performance issues.
 
 
 === Is there any way to handle auth with sockets?
 
-The downside of using WebSocket (like as with EventSource) is that its api
-does not allows append additional headers. The api is very limited for that. So
+The downside of using WebSocket (like as with EventSource) is that its API
+does not allow append additional headers. The API is very limited for that. So
 you have two ways to do it:
 
 1. Using the implicit authentication using cookies; that only works if your endpoint
 is in the same domain (no cookies send in a cross domain request).
 
-2. Using a ticket based communication with single use tockens (just make a query
-request for obtain a token and later making the subscription request passing the
+2. Using a ticket based communication with single-use tokens (just make a query
+request for obtaining a token and later making the subscription request passing the
 token using and additional query parameter:
 
 [source, clojure]
@@ -257,7 +252,7 @@ token using and additional query parameter:
 [[postal-servers]]
 === Is there any server supports that protocol?
 
-At this moment the unique backend/server implementation for this library is
+At this moment, the unique backend/server implementation for this library is
 link:https://github.com/funcool/catacumba[catacumba]. And you can find the related
 link:https://funcool.github.io/catacumba/latest/#postal[documentation] for the
 backend handlers setup.
@@ -281,7 +276,7 @@ All contributions to _postal_ should keep these important rules in mind.
 === Contributing
 
 Unlike Clojure and other Clojure contributed libraries _postal_ does not have many
-restrictions for contributions. Just open an issue or pull request.
+restrictions on contributions. Just open an issue or pull request.
 
 
 === Source Code
