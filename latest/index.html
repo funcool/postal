@@ -80,7 +80,7 @@
 <h1>postal - a postal client for clojurescript</h1>
 <div class="details">
 <span id="author" class="author">Andrey Antukh, &lt;niwi@niwi.nz&gt;</span><br>
-<span id="revnumber">version 0.5.0</span>
+<span id="revnumber">version 0.7.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -130,43 +130,42 @@
 <div class="sect2">
 <h3 id="rationale"><a class="link" href="#rationale">Rationale</a></h3>
 <div class="paragraph">
-<p>The tipical web application usually follows the api REST architecture, but the main
+<p>The typical web application usually follows the API REST architecture, but the main
 problem of that is that is bound directly to the HTTP semantics that are not
 always coherent or not always clear how to use.</p>
 </div>
 <div class="paragraph">
-<p>This is a client library that implements the <a href="https://funcool.github.io/catacumba/latest/postal.html">postal protocol</a>.
-And allows consume APIs using rich and user defined messages on top of http.</p>
+<p>Postal is a client library that implements the <a href="https://funcool.github.io/catacumba/latest/postal.html">postal protocol</a>.
+And allows consume APIs using rich and user defined messages on top of HTTP.</p>
 </div>
 <div class="paragraph">
-<p>The general idea behind the protocol and this library is borrowed from
+<p>The general idea behind the protocol and this library was inspired by
 <a href="https://facebook.github.io/relay/">Facebook Relay</a> and
 <a href="http://netflix.github.io/falcor/">Netflix&#8217;s Falcor</a>.
 The main differents with them is that this library only represents the transport
-layer, so it&#8217;s is nonobstructive and not copupled with concrete framework.</p>
+layer, so it&#8217;s is nonobstructive and not coupled with the concrete framework.</p>
 </div>
 <div class="paragraph">
-<p>This means that you can use it with any <a href="#postal-servers"><strong>postal</strong> protocol
-compliant servers</a>. One of the great examples where this library fits in a
-perfection is a transport layer for
+<p>Postal is intended for use with any <a href="#postal-servers"><strong>postal</strong> protocol
+compliant servers</a>. An exceptional example of where this library fits in is a transport layer for
 <a href="https://github.com/omcljs/om/wiki/Quick-Start-(om.next)">Om.Next</a>.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="project-maturity"><a class="link" href="#project-maturity">Project Maturity</a></h3>
 <div class="paragraph">
-<p>Since <em>postal</em> is a young project there can be some API breakage.</p>
+<p>Since <em>postal</em> is a young project, there can be some API breakage.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="install"><a class="link" href="#install">Install</a></h3>
 <div class="paragraph">
-<p>The simplest way to use <em>postal</em> in a clojure project, is by including it in the
+<p>The simplest way to use <em>postal</em> in a Clojure project is by including it in the
 dependency vector on your <strong><em>project.clj</em></strong> file:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/postal</span> <span class="tok-s">&quot;0.6.0&quot;</span><span class="tok-p">]</span></code></pre>
+<pre class="pygments highlight"><code data-lang="clojure"><span class="tok-p">[</span><span class="tok-nv">funcool/postal</span> <span class="tok-s">&quot;0.7.0&quot;</span><span class="tok-p">]</span></code></pre>
 </div>
 </div>
 </div>
@@ -176,7 +175,7 @@ dependency vector on your <strong><em>project.clj</em></strong> file:</p>
 <h2 id="getting-started"><a class="link" href="#getting-started">Getting Started</a></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The <strong>postal</strong> interface is really simple. The first step for use it, just define
+<p>The <strong>postal</strong> interface is simple. The first step for use it, just define
 a client instance:</p>
 </div>
 <div class="listingblock">
@@ -187,13 +186,12 @@ a client instance:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The client is stateless, so you can define it globally without any problem. It only
+<p>The client is stateless so that you can define it globally without any problem. It only
 stores the initial configuration.</p>
 </div>
 <div class="paragraph">
-<p>By default it uses "PUT" http connection for send messages to backend. Is should be
-also a default value in the backend but you can change it using the second optional
-parameter to the client function:</p>
+<p>By default, it uses "PUT" HTTP connection to send messages to backend. "PUT" is a good default value in the backend but if you feel otherwise you can change it using the second optional
+the parameter to the client function:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -201,17 +199,17 @@ parameter to the client function:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The "GET" method allows send the messages using http GET request using query string
-parameter. This in some circumstances enable more facilities that it can be used
-in cross domain without specially setup CORS.</p>
+<p>Using the "GET" method allows sending the messages using HTTP GET request using as well as a query string
+parameter. In some circumstances using GET (as opposed to PUT) is beneficial; for example,
+when making cross domain without specially setup CORS.</p>
 </div>
 <div class="paragraph">
-<p>Additionally, you can setup initial http headers to use, using the <code>:headers</code>
-option. And them can be updated or reset after client definition using
+<p>Additionally, you can setup initial HTTP headers to use, using the <code>:headers</code>
+option. And they can be updated or reset after client definition using
 <code>postal.client/update-headers!</code> or <code>postal.client/reset-headers!</code>.</p>
 </div>
 <div class="paragraph">
-<p>And finally, just use it using the public api. It there an example performing a
+<p>And finally, just use it using the public API. It there an example performing a
 <code>:query</code> request:</p>
 </div>
 <div class="listingblock">
@@ -224,13 +222,13 @@ option. And them can be updated or reset after client definition using
 </div>
 </div>
 <div class="paragraph">
-<p>You can notice that <code>query</code> function just return a promise that will be resolved
-with the response message or rejected with message if an <code>:error</code> message is
-returned. It there also can be rejected with an exception object if something
-foreign to transport is happens (message serialization error as example).</p>
+<p>Notice that <code>query</code> function returns a promise that will be resolved
+with the response message or rejected with a message if an <code>:error</code> message is
+returned. The promise may also be rejected with an exception object if something
+foreign to transport happens (message serialization error as an example).</p>
 </div>
 <div class="paragraph">
-<p>Additionally to query, it there is also <code>novelty</code> function, that sends <code>:novelty</code>
+<p>Additionally to query, there is also <code>novelty</code> function, that sends <code>:novelty</code>
 type frame in the same way as with <code>query</code>.</p>
 </div>
 </div>
@@ -241,14 +239,14 @@ type frame in the same way as with <code>query</code>.</p>
 <div class="sect2">
 <h3 id="user-defined-frames"><a class="link" href="#user-defined-frames">User defined frames</a></h3>
 <div class="paragraph">
-<p>At this moment, postal library only implements <code>query</code> and <code>novelty</code> specialiezed
-functions for send corresponding kind of frames. Surelly, you may want to use
+<p>At this moment, the postal library only implements <code>query</code> and <code>novelty</code> specialized
+functions for send corresponding kind of frames. Surely, you may want to use
 own messages if the provided are not enough.</p>
 </div>
 <div class="paragraph">
-<p>For that purposes, <strong>postal</strong> library exposes a <code>send!</code> function that just exposes
-a low level api for define your own helpers for send frames. Let imagine you want
-to send a <code>:take</code> type message; for that let define a helper that uses <code>send!</code>
+<p>For that purpose, <strong>postal</strong> library exposes a <code>send!</code> function that just exposes
+as a low level api to define your own helpers for send frames. Let us imagine you want
+to send a <code>:take</code> type message; to do so let&#8217;s define a helper that uses <code>send!</code>
 function for send that frame:</p>
 </div>
 <div class="listingblock">
@@ -274,26 +272,23 @@ the <code>query</code> and <code>novelty</code> functions.</p>
 <div class="sect2">
 <h3 id="server-push"><a class="link" href="#server-push">Server Push</a></h3>
 <div class="paragraph">
-<p>In some curcumstances the request/response patterns is not enough and you want
-get notifications from the backend in a server-push manener or full bi-directional
-communication with the backend.</p>
+<p>In some circumstances, the request/response patterns are not enough. Maybe you want to
+get notifications from the backend in a server-push manner or full bi-directional
+communication with the backend (as opposed to having the client pull as all of the examples previously demonstrate).</p>
 </div>
 <div class="paragraph">
-<p>For solve that, WebSocket approach is chosen because is more widelly supported by
-the browsers that Server-Sent-Events and supports bi-drectional communication with
+<p>For this, a WebSocket approach is chosen because is more widely supported by browsers then Server-Sent-Events and supports bi-directional communication with
 the server.</p>
 </div>
 <div class="paragraph">
-<p>The difference with plain websockets, you will be able send more rich messages
-because behind the scenes messages are serialized using transit serialization
-format and also you should not care about socket reconnection because it is handled
-automatically.</p>
+<p>The difference from plain WebSockets, you will be able to send more rich messages
+because behind the scenes, messages are serialized using transit serialization
+format. Additionally, handling socket reconnection
+automatic (via postal).</p>
 </div>
 <div class="paragraph">
-<p>It there two ways to connect to the server, in unidirectional or bidirectional way.
-The unidirectional approach serves just for cases where you only need server push,
-and the bi-directional in case you want also send messages to the server using the
-web socket connection. This library exposes a simple api for both approaches using
+<p>There two ways to open a WebSocket to the server, in a unidirectional or a bidirectional way.
+The unidirectional approach serves just for cases where you only need server push. The bi-directional option allows you to also send messages to the server using the web socket connection. This library exposes a simple API for both approaches using
 <a href="https://github.com/funcool/beicon">beicon library</a> (wrapper over rxjs).</p>
 </div>
 <div class="paragraph">
@@ -320,7 +315,7 @@ web socket connection. This library exposes a simple api for both approaches usi
 </div>
 </div>
 <div class="paragraph">
-<p>This will close the connection and the stream, removing all existing stream
+<p>calling <code>beicon.core/end!</code>  will close the connection and the stream, removing all existing stream
 subscriptions.</p>
 </div>
 </div>
@@ -361,38 +356,38 @@ subscriptions.</p>
 <div class="sect2">
 <h3 id="is-it-a-replacement-for-websockets"><a class="link" href="#is-it-a-replacement-for-websockets">Is it a replacement for WebSockets?</a></h3>
 <div class="paragraph">
-<p>In general NO. This library/protocol does not intends to replace any existing
+<p>In general NO. This library/protocol does not intend to replace any existing
 bi-directional protocols/messaging-systems. In fact, it lives together with
-websockets.</p>
+WebSockets.</p>
 </div>
 <div class="paragraph">
 <p>With the upcoming http2 and already existing spdy, most of the performance
 problems of the http1.x are solved. So, the majority of the standard use of
-websockets can be easily soved using http (http2/spdy).</p>
+WebSockets can be easily solved using HTTP (http2/spdy).</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="should-i-use-http2-spdy"><a class="link" href="#should-i-use-http2-spdy">Should I use HTTP2/SPDY?</a></h3>
 <div class="paragraph">
-<p>No, but is highly recommeded.</p>
+<p>No, but is highly recommended.</p>
 </div>
 <div class="paragraph">
-<p>At this moment is not necesary that you server to have the http2/spdy support,
-is more that enough putting your application behind an http proxy like nginx that
-already supports SPDY and http2 support is upcoming.</p>
+<p>At this moment, it is not necessary that your server has http2/spdy support.
+Putting your application behind an HTTP proxy like nginx that
+already supports SPDY and http2 support is an option.</p>
 </div>
 <div class="paragraph">
 <p>http2/spdy offers connection multiplexing allowing use one unique persistent
-connection handle all required context, completly eliminating the overhead of
-creating and destroyng connectons. With that you can make multiple and repeated
-http connections without performance issues.</p>
+connection handle all required context, eliminating the overhead of
+creating and destroying connections. With that, you can make multiple and repeated
+HTTP connections without performance issues.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="is-there-any-way-to-handle-auth-with-sockets"><a class="link" href="#is-there-any-way-to-handle-auth-with-sockets">Is there any way to handle auth with sockets?</a></h3>
 <div class="paragraph">
-<p>The downside of using WebSocket (like as with EventSource) is that its api
-does not allows append additional headers. The api is very limited for that. So
+<p>The downside of using WebSocket (like as with EventSource) is that its API
+does not allow append additional headers. The API is very limited for that. So
 you have two ways to do it:</p>
 </div>
 <div class="olist arabic">
@@ -402,8 +397,8 @@ you have two ways to do it:</p>
 is in the same domain (no cookies send in a cross domain request).</p>
 </li>
 <li>
-<p>Using a ticket based communication with single use tockens (just make a query
-request for obtain a token and later making the subscription request passing the
+<p>Using a ticket based communication with single-use tokens (just make a query
+request for obtaining a token and later making the subscription request passing the
 token using and additional query parameter:</p>
 </li>
 </ol>
@@ -417,7 +412,7 @@ token using and additional query parameter:</p>
 <div class="sect2">
 <h3 id="postal-servers"><a class="link" href="#postal-servers">Is there any server supports that protocol?</a></h3>
 <div class="paragraph">
-<p>At this moment the unique backend/server implementation for this library is
+<p>At this moment, the unique backend/server implementation for this library is
 <a href="https://github.com/funcool/catacumba">catacumba</a>. And you can find the related
 <a href="https://funcool.github.io/catacumba/latest/#postal">documentation</a> for the
 backend handlers setup.</p>
@@ -460,7 +455,7 @@ backend handlers setup.</p>
 <h3 id="contributing"><a class="link" href="#contributing">Contributing</a></h3>
 <div class="paragraph">
 <p>Unlike Clojure and other Clojure contributed libraries <em>postal</em> does not have many
-restrictions for contributions. Just open an issue or pull request.</p>
+restrictions on contributions. Just open an issue or pull request.</p>
 </div>
 </div>
 <div class="sect2">
@@ -529,8 +524,8 @@ For more information, please refer to &lt;http://unlicense.org/&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Version 0.5.0<br>
-Last updated 2016-03-19 10:54:11 EET
+Version 0.7.0<br>
+Last updated 2016-08-17 19:15:13 EEST
 </div>
 </div>
 </body>
